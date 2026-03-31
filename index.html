@@ -89,7 +89,6 @@ transition: background 0.2s;
 
 /* POLICY BANNER */
 .policy-banner {
-margin: 0 24px 0;
 padding: 14px 16px;
 border-radius: 12px;
 display: flex;
@@ -97,9 +96,11 @@ align-items: center;
 gap: 12px;
 font-size: 13px;
 font-weight: 500;
+background: var(–surface2);
+color: var(–text2);
 }
 .policy-banner.good { background: var(–office-light); color: var(–office-text); }
-.policy-banner.warn { background: var(–vacation-light); color: var(–vacation-text); }
+.policy-banner.warn { background: #FEF3C7; color: #92400E; }
 .policy-banner.bad { background: #FFE8E8; color: #7B1C1C; }
 .policy-icon { font-size: 20px; flex-shrink: 0; }
 .policy-detail { font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 2px; }
@@ -134,6 +135,11 @@ box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 /* MAIN CONTENT */
 .content {
 padding: 20px 24px 100px;
+}
+.week-section-title {
+font-family: ‘DM Serif Display’, serif;
+font-size: 16px; font-weight: 400;
+color: var(–text2); margin: 20px 0 10px;
 }
 
 /* SECTION HEADER */
@@ -228,8 +234,8 @@ font-size: 7px;
 color: var(–office);
 opacity: 0.8;
 }
-.cal-cell.office { background: var(–office-light); color: var(–office-text); font-weight: 700; }
-.cal-cell.planned { background: var(–planned-light); color: var(–planned-text); font-weight: 600; }
+.cal-cell.office { background: #D8F3E3; color: #1B4332; font-weight: 700; }
+.cal-cell.planned { background: #DBEAFE; color: #1e3a6e; font-weight: 600; }
 .cal-cell.wfh { background: var(–surface); color: var(–text2); }
 .cal-cell:not(.empty):not(.weekend):not(.other-month):hover { opacity: 0.75; }
 .cal-cell .day-dot { display: none; }
@@ -320,8 +326,8 @@ font-size: 12px;
 transition: all 0.15s;
 background: var(–surface2);
 }
-.week-day-cell.office .status-pip { background: var(–office-light); border-color: var(–office); }
-.week-day-cell.planned .status-pip { background: var(–planned-light); border-color: var(–planned); }
+.week-day-cell.office .status-pip { background: #D8F3E3; border-color: #2D6A4F; }
+.week-day-cell.planned .status-pip { background: #DBEAFE; border-color: #1D4E89; }
 .week-day-cell.wfh .status-pip { background: var(–surface2); border-color: var(–border); }
 .week-day-cell.today .day-num { color: var(–accent); }
 .week-day-cell:hover { background: var(–surface2); }
@@ -509,24 +515,23 @@ margin: 20px 0 10px;
   </div>
 </div>
 
-<div style="padding: 16px 0 0; display: flex; flex-direction: column; gap: 8px;">
-  <div class="policy-banner good" id="policyBanner">
-    <div class="policy-icon" id="policyIcon">✅</div>
-    <div>
-      <div id="policyText">Loading...</div>
-      <div class="policy-detail" id="policyDetail"></div>
-    </div>
-  </div>
-  <div class="policy-banner" id="forecastBanner" style="margin-top:0;">
-    <div class="policy-icon">🔮</div>
-    <div>
-      <div id="forecastText">Calculating forecast...</div>
-      <div class="policy-detail" id="forecastDetail"></div>
-    </div>
-  </div>
-</div>
-
 <div class="content">
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+    <div class="policy-banner good" id="policyBanner">
+      <div class="policy-icon" id="policyIcon">✅</div>
+      <div>
+        <div id="policyText">Loading...</div>
+        <div class="policy-detail" id="policyDetail"></div>
+      </div>
+    </div>
+    <div class="policy-banner" id="forecastBanner">
+      <div class="policy-icon">🔮</div>
+      <div>
+        <div id="forecastText">Calculating forecast...</div>
+        <div class="policy-detail" id="forecastDetail"></div>
+      </div>
+    </div>
+  </div>
   <!-- CALENDAR VIEW -->
   <div class="view-section active" id="calView">
     <div class="stats-row" id="statsRow">
@@ -574,6 +579,7 @@ margin: 20px 0 10px;
     </div>
     <div id="rollingCards"></div>
   </div>
+</div>
 </div>
 
 <!-- No modal — one-click toggle -->
