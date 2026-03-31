@@ -201,7 +201,8 @@ body {
 .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
 .legend-dot.office  { background: var(--green-light); border: 1.5px solid var(--green); }
 .legend-dot.planned { background: var(--blue-light);  border: 1.5px solid var(--blue); }
-.legend-dot.wfh     { background: var(--surface); border: 1.5px solid var(--border); }
+.legend-dot.wfh         { background: var(--surface); border: 1.5px solid var(--border); }
+.legend-dot.not-counted { background: var(--surface2); border: 1.5px solid var(--border); opacity: 0.5; }
 
 /* ── CALENDAR ── */
 .cal-grid {
@@ -266,6 +267,9 @@ body {
   color: var(--green);
   opacity: 0.7;
 }
+/* Weeks in 12-week window but NOT in best 8 — faded out */
+.cal-cell.not-counted { opacity: 0.4; }
+.cal-cell.not-counted.office { opacity: 0.5; }
 
 /* ── VIEWS ── */
 .view { display: none; }
@@ -439,8 +443,9 @@ body {
       <div class="legend-item"><div class="legend-dot office"></div>In Office</div>
       <div class="legend-item"><div class="legend-dot planned"></div>Planned Office</div>
       <div class="legend-item"><div class="legend-dot wfh"></div>WFH</div>
+      <div class="legend-item"><div class="legend-dot not-counted"></div>Not Counted</div>
     </div>
-    <div class="cal-grid">
+    <div class="cal-grid" id="calGrid">
       <div class="cal-header">
         <div class="cal-day-lbl we">Su</div>
         <div class="cal-day-lbl">Mo</div>
@@ -543,15 +548,17 @@ function calcPast() {
     const m=new Date(thisMon); m.setDate(thisMon.getDate()-i*7);
     weeks.push({ key:dateKey(m), days:weekOfficeDays(m) });
   }
+  const allKeys = new Set(weeks.map(w=>w.key));
   weeks.sort((a,b)=>b.days-a.days);
   const best8keys = new Set(weeks.slice(0,8).map(w=>w.key));
+  const notCountedKeys = new Set([...allKeys].filter(k=>!best8keys.has(k)));
   const best8 = weeks.slice(0,8).reduce((s,w)=>s+w.days,0);
   let thisWeek=0;
   for (let i=0;i<5;i++) {
     const d=new Date(thisMon); d.setDate(thisMon.getDate()+i);
     if (d<=today && isOffice(getStatus(d))) thisWeek++;
   }
-  return { best8, thisWeek, best8keys };
+  return { best8, thisWeek, best8keys, notCountedKeys };
 }
 
 function calcForecast() {
@@ -585,7 +592,7 @@ function complianceNote(monday) {
 
 // ── UI UPDATE ────────────────────────────────────────────────
 function updateBanners() {
-  const { best8, thisWeek, best8keys } = calcPast();
+  const { best8, thisWeek, best8keys, notCountedKeys } = calcPast();
   const forecast = calcForecast();
 
   // Stats
@@ -621,12 +628,13 @@ function updateBanners() {
     document.getElementById('forecastSub').textContent=`${forecast} / 24 projected across best 8 of rolling 12 weeks`;
   }
 
-  return best8keys;
+  return { best8keys, notCountedKeys };
 }
 
 // ── CALENDAR ─────────────────────────────────────────────────
 function renderCalendar() {
-  const best8keys = updateBanners();
+  const { best8keys, notCountedKeys } = updateBanners();
+  const today = new Date(); today.setHours(0,0,0,0);
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   document.getElementById('calTitle').textContent = formatMonthYear(currentMonth);
@@ -651,7 +659,13 @@ function renderCalendar() {
     } else {
       cls += ' ' + getStatus(d);
       if (isToday(d)) cls += ' today';
+      // Mark monday of best-8 weeks
       if (d.getDay()===1 && best8keys.has(dateKey(d))) cls += ' best8-mon';
+      // Mark days in not-counted weeks (past, within 12-week window, not best 8)
+      if (d < today) {
+        const mon = getMonday(d);
+        if (notCountedKeys.has(dateKey(mon))) cls += ' not-counted';
+      }
     }
     el.className = cls;
     el.textContent = day;
@@ -673,6 +687,25 @@ function changeMonth(dir) {
   renderCalendar();
 }
 
+// ── SWIPE SUPPORT ────────────────────────────────────────────
+(function() {
+  let startX = 0;
+  let startY = 0;
+  const grid = document.getElementById('calGrid');
+  if (!grid) return;
+  grid.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  grid.addEventListener('touchend', function(e) {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      changeMonth(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+})();
+
 // ── WEEKLY ───────────────────────────────────────────────────
 
 // For any given week (by monday), compute what the rolling best-8-of-12 total
@@ -691,7 +724,7 @@ function rollingTotalAtWeek(targetMonday) {
 
 function renderWeekly() {
   updateBanners();
-  const { best8keys } = calcPast();
+  const { best8keys, notCountedKeys } = calcPast();
   const today=new Date(); today.setHours(0,0,0,0);
   const thisMon=getMonday(today);
   const container=document.getElementById('weekCards');
