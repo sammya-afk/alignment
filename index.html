@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Office Attendance</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -18,12 +18,9 @@
     --office: #2D6A4F;
     --office-light: #D8F3E3;
     --office-text: #1B4332;
-    --wfh: #1D4E89;
-    --wfh-light: #DBE9FF;
-    --wfh-text: #0F2D54;
-    --vacation: #7B4F00;
-    --vacation-light: #FFF0CC;
-    --vacation-text: #4A2F00;
+    --planned: #1D4E89;
+    --planned-light: #DBEAFE;
+    --planned-text: #1e3a6e;
     --good: #2D6A4F;
     --warn: #B45309;
     --bad: #C0392B;
@@ -221,16 +218,11 @@
     border-radius: 50%;
     background: var(--accent);
   }
-  .cal-cell.office { background: var(--office-light); color: var(--office-text); }
-  .cal-cell.wfh { background: var(--wfh-light); color: var(--wfh-text); }
-  .cal-cell.vacation { background: var(--vacation-light); color: var(--vacation-text); }
+  .cal-cell.office { background: var(--office-light); color: var(--office-text); font-weight: 700; }
+  .cal-cell.planned { background: var(--planned-light); color: var(--planned-text); font-weight: 600; }
+  .cal-cell.wfh { background: var(--surface); color: var(--text2); }
   .cal-cell:not(.empty):not(.weekend):not(.other-month):hover { opacity: 0.75; }
-  .cal-cell .day-dot {
-    width: 5px; height: 5px; border-radius: 50%;
-    display: none;
-  }
-  .cal-cell.office .day-dot { display: block; background: var(--office); }
-  .cal-cell.wfh .day-dot { display: block; background: var(--wfh); }
+  .cal-cell .day-dot { display: none; }
 
   /* WEEK VIEW */
   .week-card {
@@ -299,7 +291,8 @@
     background: var(--surface2);
   }
   .week-day-cell.office .status-pip { background: var(--office-light); border-color: var(--office); }
-  .week-day-cell.wfh .status-pip { background: var(--wfh-light); border-color: var(--wfh); }
+  .week-day-cell.planned .status-pip { background: var(--planned-light); border-color: var(--planned); }
+  .week-day-cell.wfh .status-pip { background: var(--surface2); border-color: var(--border); }
   .week-day-cell.today .day-num { color: var(--accent); }
   .week-day-cell:hover { background: var(--surface2); }
   .week-day-cell.past { opacity: 0.6; }
@@ -417,7 +410,8 @@
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
   .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
   .legend-dot.office { background: var(--office-light); border: 1.5px solid var(--office); }
-  .legend-dot.wfh { background: var(--wfh-light); border: 1.5px solid var(--wfh); }
+  .legend-dot.planned { background: var(--planned-light); border: 1.5px solid var(--planned); }
+  .legend-dot.wfh { background: var(--surface); border: 1.5px solid var(--border); }
 
   /* TOAST */
   .toast {
@@ -484,12 +478,19 @@
   </div>
 </div>
 
-<div style="padding: 16px 0 0;">
+<div style="padding: 16px 0 0; display: flex; flex-direction: column; gap: 8px;">
   <div class="policy-banner good" id="policyBanner">
-    <div class="policy-icon">✅</div>
+    <div class="policy-icon" id="policyIcon">✅</div>
     <div>
       <div id="policyText">Loading...</div>
       <div class="policy-detail" id="policyDetail"></div>
+    </div>
+  </div>
+  <div class="policy-banner" id="forecastBanner" style="margin-top:0;">
+    <div class="policy-icon">🔮</div>
+    <div>
+      <div id="forecastText">Calculating forecast...</div>
+      <div class="policy-detail" id="forecastDetail"></div>
     </div>
   </div>
 </div>
@@ -498,9 +499,9 @@
   <!-- CALENDAR VIEW -->
   <div class="view-section active" id="calView">
     <div class="stats-row" id="statsRow">
-      <div class="stat-card"><div class="stat-value" id="s1">—</div><div class="stat-label">Best 8wk Days</div></div>
+      <div class="stat-card"><div class="stat-value" id="s1">—</div><div class="stat-label">Past 8wk Days</div></div>
       <div class="stat-card"><div class="stat-value" id="s2">—</div><div class="stat-label">This Week</div></div>
-      <div class="stat-card"><div class="stat-value" id="s3">—</div><div class="stat-label">Weeks Tracked</div></div>
+      <div class="stat-card"><div class="stat-value" id="s3">—</div><div class="stat-label">Forecast Days</div></div>
     </div>
 
     <div class="section-nav">
@@ -513,6 +514,7 @@
 
     <div class="legend">
       <div class="legend-item"><div class="legend-dot office"></div>In Office</div>
+      <div class="legend-item"><div class="legend-dot planned"></div>Planned Office</div>
       <div class="legend-item"><div class="legend-dot wfh"></div>WFH</div>
     </div>
 
@@ -545,29 +547,7 @@
   </div>
 </div>
 
-<!-- DAY MODAL -->
-<div class="modal-overlay" id="dayModal" onclick="handleOverlayClick(event)">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modalTitle">Tuesday, Mar 18</div>
-    <div class="modal-subtitle">Mark your work location for this day</div>
-    <div class="modal-options">
-      <div class="modal-option office-opt" onclick="setDay('office')">
-        <div class="modal-opt-icon">🏢</div>
-        <div><div class="modal-opt-label">In Office</div><div class="modal-opt-sub">Counts toward your policy</div></div>
-      </div>
-      <div class="modal-option wfh-opt" onclick="setDay('wfh')">
-        <div class="modal-opt-icon">🏠</div>
-        <div><div class="modal-opt-label">Work From Home</div><div class="modal-opt-sub">WFH day</div></div>
-      </div>
-      <div class="modal-option clear-opt" onclick="setDay('clear')">
-        <div class="modal-opt-icon">✕</div>
-        <div><div class="modal-opt-label">Clear</div><div class="modal-opt-sub">Remove entry for this day</div></div>
-      </div>
-    </div>
-    <button class="modal-close" onclick="closeModal()">Cancel</button>
-  </div>
-</div>
+<!-- No modal — one-click toggle -->
 
 <div class="toast" id="toast"></div>
 
@@ -625,67 +605,110 @@ function formatWeekLabel(monday) {
   return `${m1} – ${m2}`;
 }
 
-// Policy calculation
-function calcPolicy() {
+// Returns effective status for any day — past uses real data, future uses assumptions
+function getEffectiveStatus(d) {
   const today = new Date(); today.setHours(0,0,0,0);
-  
-  // Get current week's Monday
+  const key = dateKey(d);
+  const saved = attendanceData[key];
+  if (saved) return saved; // always trust explicit saved data
+  if (d <= today) return 'wfh'; // past unlogged = wfh
+  // Future default: Tue/Wed/Thu = office, Mon/Fri = wfh
+  const dow = d.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+  return (dow === 2 || dow === 3 || dow === 4) ? 'planned' : 'wfh';
+}
+
+function isOfficeDay(status) {
+  return status === 'office' || status === 'planned';
+}
+
+function calcWeekOfficeDays(monday, useEffective) {
+  let count = 0;
+  for (let d = 0; d < 5; d++) {
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + d);
+    const status = useEffective ? getEffectiveStatus(day) : (attendanceData[dateKey(day)] || 'wfh');
+    if (isOfficeDay(status)) count++;
+  }
+  return count;
+}
+
+// Past policy: best 8 of last 12 complete weeks (real data only)
+function calcPastPolicy() {
+  const today = new Date(); today.setHours(0,0,0,0);
   const thisMonday = getMonday(today);
-  
-  // Collect last 12 complete weeks (exclude current week)
   const weeks = [];
   for (let i = 1; i <= 12; i++) {
     const mon = new Date(thisMonday);
     mon.setDate(mon.getDate() - i * 7);
-    let officeDays = 0;
-    for (let d = 0; d < 5; d++) {
-      const day = new Date(mon);
-      day.setDate(mon.getDate() + d);
-      if (attendanceData[dateKey(day)] === 'office') officeDays++;
-    }
-    weeks.push({ monday: mon, officeDays });
+    weeks.push(calcWeekOfficeDays(mon, false));
   }
-  
-  // Best 8 weeks
-  const sorted = [...weeks].sort((a, b) => b.officeDays - a.officeDays);
-  const best8 = sorted.slice(0, 8);
-  const totalBest8 = best8.reduce((s, w) => s + w.officeDays, 0);
-  
-  // Current week
-  let thisWeekDays = 0;
+  const sorted = [...weeks].sort((a, b) => b - a);
+  const best8 = sorted.slice(0, 8).reduce((s, v) => s + v, 0);
+  // This week so far
+  let thisWeek = 0;
   for (let d = 0; d < 5; d++) {
-    const day = new Date(thisMonday);
-    day.setDate(thisMonday.getDate() + d);
-    if (attendanceData[dateKey(day)] === 'office') thisWeekDays++;
+    const day = new Date(thisMonday); day.setDate(thisMonday.getDate() + d);
+    if (day <= today && isOfficeDay(attendanceData[dateKey(day)] || '')) thisWeek++;
   }
-  
-  return { totalBest8, thisWeekDays, weeksTracked: weeks.length };
+  return { best8, thisWeek };
+}
+
+// Forecast: best 8 of rolling 12 weeks centered on today (past real + future planned)
+function calcForecastPolicy() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const thisMonday = getMonday(today);
+  // 6 weeks back + current + 5 weeks forward = 12 weeks
+  const weeks = [];
+  for (let i = -6; i <= 5; i++) {
+    const mon = new Date(thisMonday);
+    mon.setDate(mon.getDate() + i * 7);
+    weeks.push(calcWeekOfficeDays(mon, true));
+  }
+  const sorted = [...weeks].sort((a, b) => b - a);
+  return sorted.slice(0, 8).reduce((s, v) => s + v, 0);
 }
 
 function updatePolicyBanner() {
-  const { totalBest8, thisWeekDays, weeksTracked } = calcPolicy();
+  const { best8, thisWeek } = calcPastPolicy();
+  const forecast = calcForecastPolicy();
+
+  // Stats row
+  document.getElementById('s1').textContent = best8;
+  document.getElementById('s2').textContent = thisWeek;
+  document.getElementById('s3').textContent = forecast;
+  const s1card = document.getElementById('s1').parentElement;
+  s1card.className = 'stat-card ' + (best8 >= 24 ? 'highlight' : best8 >= 20 ? 'warn-stat' : 'bad-stat');
+  const s3card = document.getElementById('s3').parentElement;
+  s3card.className = 'stat-card ' + (forecast >= 24 ? 'highlight' : forecast >= 20 ? 'warn-stat' : 'bad-stat');
+
+  // Past banner
   const banner = document.getElementById('policyBanner');
   const text = document.getElementById('policyText');
   const detail = document.getElementById('policyDetail');
-  
-  // Update stats
-  document.getElementById('s1').textContent = totalBest8;
-  document.getElementById('s2').textContent = thisWeekDays;
-  document.getElementById('s3').textContent = weeksTracked;
-  
-  // Color stat cards
-  const s1card = document.getElementById('s1').parentElement;
-  s1card.className = 'stat-card ' + (totalBest8 >= 24 ? 'highlight' : totalBest8 >= 20 ? 'warn-stat' : 'bad-stat');
-  
-  const needed = 24 - totalBest8;
-  if (totalBest8 >= 24) {
+  const needed = 24 - best8;
+  if (best8 >= 24) {
     banner.className = 'policy-banner good';
-    text.textContent = `✅ Policy Aligned — ${totalBest8} days in your best 8 weeks`;
-    detail.textContent = `You're ${totalBest8 - 24} days above the 24-day minimum`;
+    text.textContent = `Policy Aligned — ${best8} days in best 8 weeks`;
+    detail.textContent = `${best8 - 24} days above the 24-day minimum`;
   } else {
     banner.className = 'policy-banner ' + (needed <= 4 ? 'warn' : 'bad');
-    text.textContent = `${needed <= 4 ? '⚠️' : '❌'} ${needed} more office days needed`;
-    detail.textContent = `${totalBest8} / 24 days across best 8 of last 12 weeks`;
+    text.textContent = `${needed} more office days needed`;
+    detail.textContent = `${best8} / 24 days across best 8 of last 12 weeks`;
+  }
+
+  // Forecast banner
+  const fb = document.getElementById('forecastBanner');
+  const ft = document.getElementById('forecastText');
+  const fd = document.getElementById('forecastDetail');
+  if (forecast >= 24) {
+    fb.className = 'policy-banner good';
+    ft.textContent = `On track — ${forecast} days projected`;
+    fd.textContent = 'Based on past + Tue/Wed/Thu planned office';
+  } else {
+    const fneeded = 24 - forecast;
+    fb.className = 'policy-banner ' + (fneeded <= 4 ? 'warn' : 'bad');
+    ft.textContent = `Projected short by ${fneeded} days`;
+    fd.textContent = `${forecast} / 24 projected across best 8 of rolling 12 weeks`;
   }
 }
 
@@ -713,22 +736,23 @@ function renderCalendar() {
     const d = new Date(year, month, day);
     const key = dateKey(d);
     const cell = document.createElement('div');
-    const status = attendanceData[key] || '';
-    
+    const effectiveStatus = getEffectiveStatus(d);
+
     let cls = 'cal-cell';
-    if (isWeekend(d)) cls += ' weekend';
-    else {
-      if (status) cls += ' ' + status;
+    if (isWeekend(d)) {
+      cls += ' weekend';
+    } else {
+      cls += ' ' + effectiveStatus;
       if (isToday(d)) cls += ' today';
     }
-    
+
     cell.className = cls;
     cell.innerHTML = `<span>${day}</span>`;
-    
+
     if (!isWeekend(d)) {
-      cell.onclick = () => openModal(d);
+      cell.onclick = () => toggleDay(d);
     }
-    
+
     cells.appendChild(cell);
   }
   
@@ -778,50 +802,44 @@ function renderWeekCard(containerId, monday, interactive) {
 
 function renderWeekCardInto(container, monday, interactive) {
   const today = new Date(); today.setHours(0,0,0,0);
-  
+
   let officeDays = 0;
   for (let d = 0; d < 5; d++) {
-    const day = new Date(monday);
-    day.setDate(monday.getDate() + d);
-    if (attendanceData[dateKey(day)] === 'office') officeDays++;
+    const day = new Date(monday); day.setDate(monday.getDate() + d);
+    if (isOfficeDay(getEffectiveStatus(day))) officeDays++;
   }
-  
+
   const card = document.createElement('div');
   card.className = 'week-card';
-  
   const badgeCls = officeDays >= 3 ? 'good' : officeDays > 0 ? 'warn' : 'neutral';
   const label = formatWeekLabel(monday);
-  
+
   card.innerHTML = `
     <div class="week-card-header">
       <div class="week-label">${label}</div>
       <div class="week-count-badge ${badgeCls}">${officeDays}/5 office</div>
     </div>
-    <div class="week-days" id="wdays-${dateKey(monday)}"></div>
+    <div class="week-days"></div>
   `;
   container.appendChild(card);
-  
+
   const daysRow = card.querySelector('.week-days');
   const dayNames = ['Mon','Tue','Wed','Thu','Fri'];
-  
+
   for (let d = 0; d < 5; d++) {
-    const day = new Date(monday);
-    day.setDate(monday.getDate() + d);
-    const key = dateKey(day);
-    const status = attendanceData[key] || '';
-    const past = day < today;
+    const day = new Date(monday); day.setDate(monday.getDate() + d);
+    const effectiveStatus = getEffectiveStatus(day);
     const todayDay = isToday(day);
-    
-    const pip = status === 'office' ? '🏢' : status === 'wfh' ? '🏠' : '';
-    
+    const pip = effectiveStatus === 'office' ? '🏢' : effectiveStatus === 'planned' ? '📅' : '🏠';
+
     const cell = document.createElement('div');
-    cell.className = `week-day-cell ${status} ${past && !todayDay ? 'past' : ''} ${todayDay ? 'today' : ''}`;
+    cell.className = `week-day-cell ${effectiveStatus} ${todayDay ? 'today' : ''}`;
     cell.innerHTML = `
       <div class="day-name">${dayNames[d]}</div>
       <div class="day-num">${day.getDate()}</div>
       <div class="status-pip">${pip}</div>
     `;
-    cell.onclick = () => openModal(day);
+    cell.onclick = () => toggleDay(day);
     daysRow.appendChild(cell);
   }
 }
@@ -831,49 +849,46 @@ function changeWeekOffset(dir) {
   renderWeekly();
 }
 
-// MODAL
-function openModal(d) {
-  selectedDate = d;
+// ONE-CLICK TOGGLE
+async function toggleDay(d) {
   const key = dateKey(d);
-  const status = attendanceData[key] || '';
-  
-  document.getElementById('modalTitle').textContent = formatDate(d);
-  
-  // Highlight current
-  document.querySelectorAll('.modal-option').forEach(el => el.classList.remove('selected'));
-  if (status === 'office') document.querySelector('.office-opt').classList.add('selected');
-  else if (status === 'wfh') document.querySelector('.wfh-opt').classList.add('selected');
-  
-  document.getElementById('dayModal').classList.add('open');
-}
+  const today = new Date(); today.setHours(0,0,0,0);
+  const isFutureDay = d > today;
+  const current = attendanceData[key];
 
-function closeModal() {
-  document.getElementById('dayModal').classList.remove('open');
-  selectedDate = null;
-}
+  // Determine what the default would be (so we know what "unset" means)
+  const dow = d.getDay();
+  const defaultIsOffice = isFutureDay && (dow === 2 || dow === 3 || dow === 4);
 
-function handleOverlayClick(e) {
-  if (e.target === document.getElementById('dayModal')) closeModal();
-}
+  let newStatus;
+  if (!current) {
+    // Not explicitly set — toggle to office (override default)
+    newStatus = defaultIsOffice ? 'wfh' : 'office';
+  } else if (current === 'office' || current === 'planned') {
+    // Was office — toggle to wfh (clear the explicit entry, revert to default)
+    newStatus = null;
+  } else {
+    // Was wfh — toggle to office
+    newStatus = 'office';
+  }
 
-async function setDay(status) {
-  if (!selectedDate) return;
-  const key = dateKey(selectedDate);
-  
-  if (status === 'clear') {
+  if (newStatus === null) {
     delete attendanceData[key];
   } else {
-    attendanceData[key] = status;
+    attendanceData[key] = newStatus;
   }
-  
-  closeModal();
+
   renderCalendar();
   if (currentTab === 'weekly') renderWeekly();
   updatePolicyBanner();
-  
-  // Save to localStorage immediately, then sync to Sheets
   saveToLocalStorage();
-  await saveDay(key, status === 'clear' ? '' : status);
+
+  const label = newStatus === 'office' ? '🏢 Marked In Office'
+              : newStatus === null && defaultIsOffice ? '📅 Reverted to planned office'
+              : '🏠 Marked WFH';
+  showToast(label);
+
+  await saveDay(key, newStatus || '');
 }
 
 // GOOGLE SHEETS SYNC
