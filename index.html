@@ -286,6 +286,16 @@ body {
 }
 .week-card.current { border-left-color: var(--accent); box-shadow: var(--shadow-lg); }
 .week-card.in-best8 { border-left-color: var(--green); }
+.week-card.not-counted-week { opacity: 0.55; }
+.not-counted-tag {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--text3);
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 2px 6px;
+  text-transform: uppercase;
+}
 .week-card-head {
   display: flex;
   align-items: center;
@@ -576,18 +586,19 @@ function calcForecast() {
 function complianceNote(monday) {
   const today=new Date(); today.setHours(0,0,0,0);
   if (monday<=today) return null;
-  const thisMon=getMonday(today);
-  const others=[];
-  for (let i=-6;i<=5;i++) {
-    const m=new Date(thisMon); m.setDate(thisMon.getDate()+i*7);
-    if (dateKey(m)===dateKey(monday)) continue;
-    others.push(weekOfficeDays(m));
+
+  // Simulate rolling 12 weeks ending at THIS future week
+  // i.e. what would best-8-of-12 look like at end of that week?
+  const weeks=[];
+  for (let i=0; i<12; i++) {
+    const m=new Date(monday); m.setDate(monday.getDate()-i*7);
+    weeks.push(weekOfficeDays(m));
   }
-  others.sort((a,b)=>b-a);
-  const best7=others.slice(0,7).reduce((s,v)=>s+v,0);
-  const needed=Math.max(0,24-best7);
-  const planned=weekOfficeDays(monday);
-  return { needed, planned, ok: planned>=needed };
+  weeks.sort((a,b)=>b-a);
+  const projected=weeks.slice(0,8).reduce((s,v)=>s+v,0);
+  const planned=weeks[0]; // this week's days (index 0 = the monday itself)
+  const needed=Math.max(0,24-projected);
+  return { needed, planned, projected, ok: projected>=24 };
 }
 
 // ── UI UPDATE ────────────────────────────────────────────────
@@ -730,41 +741,39 @@ function renderWeekly() {
   const container=document.getElementById('weekCards');
   container.innerHTML='';
 
-  // Past 12 weeks (oldest first) + current + 6 future = 19 weeks total
-  const weeks=[];
-  for (let i=-12; i<=6; i++) {
+  // Past 12 + current + 20 future = 33 weeks total
+  let currentCard = null;
+  for (let i=-12; i<=20; i++) {
     const mon=new Date(thisMon); mon.setDate(thisMon.getDate()+i*7);
-    weeks.push({ mon, i });
-  }
-
-  weeks.forEach(({ mon, i }) => {
     const isCurrent = i===0;
     const isPast = i<0;
     const isFuture = i>0;
     const inBest8 = isPast && best8keys.has(dateKey(mon));
+    const inNotCounted = isPast && notCountedKeys.has(dateKey(mon));
     const days = weekOfficeDays(mon);
     const rollingTotal = rollingTotalAtWeek(mon);
     const aligned = rollingTotal >= 24;
 
     const card=document.createElement('div');
     let cardCls = 'week-card';
-    if (isCurrent) cardCls += ' current';
+    if (isCurrent) { cardCls += ' current'; currentCard = card; }
     else if (inBest8) cardCls += ' in-best8';
+    else if (inNotCounted) cardCls += ' not-counted-week';
     card.className = cardCls;
 
     const badgeCls = days>=3?'good':days>0?'warn':'none';
     const label = isCurrent ? 'This Week' : formatWeekLabel(mon);
     const best8html = inBest8 ? '<span class="best8-tag">★ Best 8</span>' : '';
+    const notCountedHtml = inNotCounted ? '<span class="not-counted-tag">Not Counted</span>' : '';
 
-    // Rolling total badge
     const totalCls = aligned ? 'rolling-total aligned' : 'rolling-total short';
-    const totalLabel = aligned ? `✓ ${rollingTotal} days` : `✗ ${rollingTotal}/24`;
+    const totalLabel = aligned ? `✓ ${rollingTotal}` : `✗ ${rollingTotal}/24`;
 
     card.innerHTML=`
       <div class="week-card-head">
         <div class="week-card-left">
           <div class="week-lbl">${label}</div>
-          ${best8html}
+          ${best8html}${notCountedHtml}
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <div class="day-count ${badgeCls}">${days}d</div>
@@ -792,17 +801,22 @@ function renderWeekly() {
       daysRow.appendChild(cell);
     }
 
-    // Future weeks: compliance note
+    // Future weeks: show compliance note only if at risk
     if (isFuture) {
       const note=complianceNote(mon);
       if (note && !note.ok) {
         const el=document.createElement('div');
         el.className='compliance-note warn';
-        el.textContent=`⚠ Need ${note.needed} office day${note.needed!==1?'s':''} this week to stay compliant`;
+        el.textContent=`⚠ Projected ${note.projected}/24 — at risk this week`;
         card.appendChild(el);
       }
     }
-  });
+  }
+
+  // Scroll current week into view
+  if (currentCard) {
+    setTimeout(()=>currentCard.scrollIntoView({ behavior:'smooth', block:'center' }), 100);
+  }
 }
 
 // ── TOGGLE ───────────────────────────────────────────────────
