@@ -890,10 +890,17 @@ function showToast(msg) {
 }
 
 // ── INIT ─────────────────────────────────────────────────────
+// Version flag — increment this to force-clear cache on all devices
+const CACHE_VERSION = 'v5';
+if (localStorage.getItem('cacheVersion') !== CACHE_VERSION) {
+  localStorage.clear();
+  localStorage.setItem('cacheVersion', CACHE_VERSION);
+}
+
 currentMonth = new Date();
-renderCalendar(); // show empty calendar immediately
-if (loadLocal()) render(); // show cached data instantly if available
-loadFromSheets(); // fetch fresh from sheet (updates display when done)
+renderCalendar();
+if (loadLocal()) render();
+loadFromSheets();
 </script>
 </body>
 </html>
