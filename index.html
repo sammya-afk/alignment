@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Office Attendance</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F2EE;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE8;
+    --border: #E2DDD6;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #A09A93;
+    --office: #2D6A4F;
+    --office-light: #D8F3E3;
+    --office-text: #1B4332;
+    --wfh: #1D4E89;
+    --wfh-light: #DBE9FF;
+    --wfh-text: #0F2D54;
+    --vacation: #7B4F00;
+    --vacation-light: #FFF0CC;
+    --vacation-text: #4A2F00;
+    --good: #2D6A4F;
+    --warn: #B45309;
+    --bad: #C0392B;
+    --accent: #C4622D;
+    --radius: 14px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--text);
+    color: white;
+    padding: 52px 24px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.3px;
+  }
+  .header h1 em {
+    font-style: italic;
+    color: #C4A882;
+  }
+  .sync-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.2s;
+  }
+  .sync-btn:hover { background: rgba(255,255,255,0.2); }
+  .sync-btn.loading { opacity: 0.6; pointer-events: none; }
+
+  /* POLICY BANNER */
+  .policy-banner {
+    margin: 0 24px 0;
+    padding: 14px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .policy-banner.good { background: var(--office-light); color: var(--office-text); }
+  .policy-banner.warn { background: var(--vacation-light); color: var(--vacation-text); }
+  .policy-banner.bad { background: #FFE8E8; color: #7B1C1C; }
+  .policy-icon { font-size: 20px; flex-shrink: 0; }
+  .policy-detail { font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 2px; }
+
+  /* TAB BAR */
+  .tab-bar {
+    display: flex;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 3px;
+    margin: 16px 24px 0;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+
+  /* MAIN CONTENT */
+  .content {
+    padding: 20px 24px 100px;
+  }
+
+  /* SECTION HEADER */
+  .section-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-nav h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+  }
+  .nav-arrows { display: flex; gap: 6px; }
+  .nav-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+  .nav-btn:hover { background: var(--surface2); }
+
+  /* CALENDAR */
+  .calendar-grid {
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .cal-days-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .cal-day-label {
+    text-align: center;
+    padding: 10px 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .cal-day-label.weekend { color: var(--border); }
+  .cal-cells {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .cal-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell.empty { background: var(--bg); cursor: default; }
+  .cal-cell.weekend { background: var(--bg); cursor: default; color: var(--text3); }
+  .cal-cell.other-month { color: var(--text3); opacity: 0.4; }
+  .cal-cell.today { font-weight: 700; }
+  .cal-cell.today::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .cal-cell.office { background: var(--office-light); color: var(--office-text); }
+  .cal-cell.wfh { background: var(--wfh-light); color: var(--wfh-text); }
+  .cal-cell.vacation { background: var(--vacation-light); color: var(--vacation-text); }
+  .cal-cell:not(.empty):not(.weekend):not(.other-month):hover { opacity: 0.75; }
+  .cal-cell .day-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    display: none;
+  }
+  .cal-cell.office .day-dot { display: block; background: var(--office); }
+  .cal-cell.wfh .day-dot { display: block; background: var(--wfh); }
+
+  /* WEEK VIEW */
+  .week-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+  .week-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .week-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+  }
+  .week-count-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .week-count-badge.good { background: var(--office-light); color: var(--office-text); }
+  .week-count-badge.warn { background: var(--vacation-light); color: var(--vacation-text); }
+  .week-count-badge.neutral { background: var(--surface2); color: var(--text2); }
+  .week-days {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+  }
+  .week-day-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-right: 1px solid var(--border);
+    gap: 6px;
+  }
+  .week-day-cell:last-child { border-right: none; }
+  .week-day-cell .day-name {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .week-day-cell .day-num {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text2);
+  }
+  .week-day-cell .status-pip {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    transition: all 0.15s;
+    background: var(--surface2);
+  }
+  .week-day-cell.office .status-pip { background: var(--office-light); border-color: var(--office); }
+  .week-day-cell.wfh .status-pip { background: var(--wfh-light); border-color: var(--wfh); }
+  .week-day-cell.today .day-num { color: var(--accent); }
+  .week-day-cell:hover { background: var(--surface2); }
+  .week-day-cell.past { opacity: 0.6; }
+
+  /* STATS CARD */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 14px 12px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .stat-card.highlight .stat-value { color: var(--good); }
+  .stat-card.warn-stat .stat-value { color: var(--warn); }
+  .stat-card.bad-stat .stat-value { color: var(--bad); }
+
+  /* DAY PICKER MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    padding: 20px 24px 40px;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+  .modal-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+  .modal-options { display: flex; flex-direction: column; gap: 10px; }
+  .modal-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .modal-option:hover { border-color: var(--text3); }
+  .modal-option.selected { border-color: currentColor; }
+  .modal-option.office-opt { color: var(--office); }
+  .modal-option.office-opt.selected { background: var(--office-light); }
+  .modal-option.wfh-opt { color: var(--wfh); }
+  .modal-option.wfh-opt.selected { background: var(--wfh-light); }
+  .modal-option.clear-opt { color: var(--text2); }
+  .modal-option.clear-opt.selected { background: var(--surface2); }
+  .modal-opt-icon { font-size: 24px; }
+  .modal-opt-label { font-size: 15px; font-weight: 600; }
+  .modal-opt-sub { font-size: 12px; font-weight: 400; color: var(--text3); }
+  .modal-close {
+    margin-top: 12px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--surface2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text2);
+    cursor: pointer;
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+  .legend-dot.office { background: var(--office-light); border: 1.5px solid var(--office); }
+  .legend-dot.wfh { background: var(--wfh-light); border: 1.5px solid var(--wfh); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 300;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* LOADING */
+  .loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+    gap: 12px;
+    color: var(--text2);
+    font-size: 14px;
+  }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--text);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .view-section { display: none; }
+  .view-section.active { display: block; }
+
+  .week-section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text2);
+    margin: 20px 0 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>Office<br><em>Attendance</em></h1>
+    <button class="sync-btn" id="syncBtn" onclick="syncData()">
+      <span id="syncIcon">⟳</span> Sync
+    </button>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('calendar')">📅 Calendar</button>
+    <button class="tab-btn" onclick="switchTab('weekly')">📋 Weekly</button>
+  </div>
+</div>
+
+<div style="padding: 16px 0 0;">
+  <div class="policy-banner good" id="policyBanner">
+    <div class="policy-icon">✅</div>
+    <div>
+      <div id="policyText">Loading...</div>
+      <div class="policy-detail" id="policyDetail"></div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <!-- CALENDAR VIEW -->
+  <div class="view-section active" id="calView">
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card"><div class="stat-value" id="s1">—</div><div class="stat-label">Best 8wk Days</div></div>
+      <div class="stat-card"><div class="stat-value" id="s2">—</div><div class="stat-label">This Week</div></div>
+      <div class="stat-card"><div class="stat-value" id="s3">—</div><div class="stat-label">Weeks Tracked</div></div>
+    </div>
+
+    <div class="section-nav">
+      <h2 id="calTitle">March 2025</h2>
+      <div class="nav-arrows">
+        <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+        <button class="nav-btn" onclick="changeMonth(1)">›</button>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot office"></div>In Office</div>
+      <div class="legend-item"><div class="legend-dot wfh"></div>WFH</div>
+    </div>
+
+    <div class="calendar-grid">
+      <div class="cal-days-header">
+        <div class="cal-day-label weekend">Su</div>
+        <div class="cal-day-label">Mo</div>
+        <div class="cal-day-label">Tu</div>
+        <div class="cal-day-label">We</div>
+        <div class="cal-day-label">Th</div>
+        <div class="cal-day-label">Fr</div>
+        <div class="cal-day-label weekend">Sa</div>
+      </div>
+      <div class="cal-cells" id="calCells"></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY VIEW -->
+  <div class="view-section" id="weekView">
+    <div class="section-nav">
+      <h2 id="weekTitle">This Week</h2>
+      <div class="nav-arrows">
+        <button class="nav-btn" onclick="changeWeekOffset(-1)">‹</button>
+        <button class="nav-btn" onclick="changeWeekOffset(1)">›</button>
+      </div>
+    </div>
+    <div id="weekCards"></div>
+    <div class="week-section-title">12-Week Rolling Window</div>
+    <div id="rollingCards"></div>
+  </div>
+</div>
+
+<!-- DAY MODAL -->
+<div class="modal-overlay" id="dayModal" onclick="handleOverlayClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">Tuesday, Mar 18</div>
+    <div class="modal-subtitle">Mark your work location for this day</div>
+    <div class="modal-options">
+      <div class="modal-option office-opt" onclick="setDay('office')">
+        <div class="modal-opt-icon">🏢</div>
+        <div><div class="modal-opt-label">In Office</div><div class="modal-opt-sub">Counts toward your policy</div></div>
+      </div>
+      <div class="modal-option wfh-opt" onclick="setDay('wfh')">
+        <div class="modal-opt-icon">🏠</div>
+        <div><div class="modal-opt-label">Work From Home</div><div class="modal-opt-sub">WFH day</div></div>
+      </div>
+      <div class="modal-option clear-opt" onclick="setDay('clear')">
+        <div class="modal-opt-icon">✕</div>
+        <div><div class="modal-opt-label">Clear</div><div class="modal-opt-sub">Remove entry for this day</div></div>
+      </div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyMLXC2GQ9ieeu3r0hUhFBigb_riv1NypZIJD90Y8mJvzNymOS-AgZphY12rMrzqxGCA/exec';
+
+// STATE
+let attendanceData = {}; // key: "YYYY-MM-DD", val: "office"|"wfh"
+let currentMonth = new Date();
+let weekOffset = 0;
+let selectedDate = null;
+let currentTab = 'calendar';
+
+// Helpers
+function dateKey(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function getMonday(d) {
+  const dt = new Date(d);
+  const day = dt.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  dt.setDate(dt.getDate() + diff);
+  dt.setHours(0,0,0,0);
+  return dt;
+}
+
+function isWeekend(d) { return d.getDay() === 0 || d.getDay() === 6; }
+
+function isToday(d) {
+  const t = new Date();
+  return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
+}
+
+function isFuture(d) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  return d > t;
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+}
+
+function formatMonthYear(d) {
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+function formatWeekLabel(monday) {
+  const friday = new Date(monday); friday.setDate(monday.getDate() + 4);
+  const m1 = monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const m2 = friday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${m1} – ${m2}`;
+}
+
+// Policy calculation
+function calcPolicy() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  
+  // Get current week's Monday
+  const thisMonday = getMonday(today);
+  
+  // Collect last 12 complete weeks (exclude current week)
+  const weeks = [];
+  for (let i = 1; i <= 12; i++) {
+    const mon = new Date(thisMonday);
+    mon.setDate(mon.getDate() - i * 7);
+    let officeDays = 0;
+    for (let d = 0; d < 5; d++) {
+      const day = new Date(mon);
+      day.setDate(mon.getDate() + d);
+      if (attendanceData[dateKey(day)] === 'office') officeDays++;
+    }
+    weeks.push({ monday: mon, officeDays });
+  }
+  
+  // Best 8 weeks
+  const sorted = [...weeks].sort((a, b) => b.officeDays - a.officeDays);
+  const best8 = sorted.slice(0, 8);
+  const totalBest8 = best8.reduce((s, w) => s + w.officeDays, 0);
+  
+  // Current week
+  let thisWeekDays = 0;
+  for (let d = 0; d < 5; d++) {
+    const day = new Date(thisMonday);
+    day.setDate(thisMonday.getDate() + d);
+    if (attendanceData[dateKey(day)] === 'office') thisWeekDays++;
+  }
+  
+  return { totalBest8, thisWeekDays, weeksTracked: weeks.length };
+}
+
+function updatePolicyBanner() {
+  const { totalBest8, thisWeekDays, weeksTracked } = calcPolicy();
+  const banner = document.getElementById('policyBanner');
+  const text = document.getElementById('policyText');
+  const detail = document.getElementById('policyDetail');
+  
+  // Update stats
+  document.getElementById('s1').textContent = totalBest8;
+  document.getElementById('s2').textContent = thisWeekDays;
+  document.getElementById('s3').textContent = weeksTracked;
+  
+  // Color stat cards
+  const s1card = document.getElementById('s1').parentElement;
+  s1card.className = 'stat-card ' + (totalBest8 >= 24 ? 'highlight' : totalBest8 >= 20 ? 'warn-stat' : 'bad-stat');
+  
+  const needed = 24 - totalBest8;
+  if (totalBest8 >= 24) {
+    banner.className = 'policy-banner good';
+    text.textContent = `✅ Policy Aligned — ${totalBest8} days in your best 8 weeks`;
+    detail.textContent = `You're ${totalBest8 - 24} days above the 24-day minimum`;
+  } else {
+    banner.className = 'policy-banner ' + (needed <= 4 ? 'warn' : 'bad');
+    text.textContent = `${needed <= 4 ? '⚠️' : '❌'} ${needed} more office days needed`;
+    detail.textContent = `${totalBest8} / 24 days across best 8 of last 12 weeks`;
+  }
+}
+
+// CALENDAR VIEW
+function renderCalendar() {
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  document.getElementById('calTitle').textContent = formatMonthYear(currentMonth);
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDow = firstDay.getDay(); // 0=Sun
+  
+  const cells = document.getElementById('calCells');
+  cells.innerHTML = '';
+  
+  // Fill empty cells before
+  for (let i = 0; i < startDow; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell empty';
+    cells.appendChild(cell);
+  }
+  
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const d = new Date(year, month, day);
+    const key = dateKey(d);
+    const cell = document.createElement('div');
+    const status = attendanceData[key] || '';
+    
+    let cls = 'cal-cell';
+    if (isWeekend(d)) cls += ' weekend';
+    else {
+      if (status) cls += ' ' + status;
+      if (isToday(d)) cls += ' today';
+    }
+    
+    cell.className = cls;
+    cell.innerHTML = `<span>${day}</span>`;
+    
+    if (!isWeekend(d)) {
+      cell.onclick = () => openModal(d);
+    }
+    
+    cells.appendChild(cell);
+  }
+  
+  // Fill remaining
+  const totalCells = startDow + lastDay.getDate();
+  const remainder = totalCells % 7;
+  if (remainder > 0) {
+    for (let i = 0; i < 7 - remainder; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell empty';
+      cells.appendChild(cell);
+    }
+  }
+}
+
+function changeMonth(dir) {
+  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + dir, 1);
+  renderCalendar();
+}
+
+// WEEKLY VIEW
+function renderWeekly() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const baseMonday = getMonday(today);
+  baseMonday.setDate(baseMonday.getDate() + weekOffset * 7);
+  
+  document.getElementById('weekTitle').textContent = weekOffset === 0 ? 'This Week' : formatWeekLabel(baseMonday);
+  
+  // Current/offset week
+  renderWeekCard('weekCards', baseMonday, true);
+  
+  // Rolling 12 weeks
+  const rolling = document.getElementById('rollingCards');
+  rolling.innerHTML = '';
+  for (let i = 1; i <= 12; i++) {
+    const mon = new Date(getMonday(today));
+    mon.setDate(mon.getDate() - i * 7);
+    renderWeekCardInto(rolling, mon, false);
+  }
+}
+
+function renderWeekCard(containerId, monday, interactive) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  renderWeekCardInto(container, monday, interactive);
+}
+
+function renderWeekCardInto(container, monday, interactive) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  
+  let officeDays = 0;
+  for (let d = 0; d < 5; d++) {
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + d);
+    if (attendanceData[dateKey(day)] === 'office') officeDays++;
+  }
+  
+  const card = document.createElement('div');
+  card.className = 'week-card';
+  
+  const badgeCls = officeDays >= 3 ? 'good' : officeDays > 0 ? 'warn' : 'neutral';
+  const label = formatWeekLabel(monday);
+  
+  card.innerHTML = `
+    <div class="week-card-header">
+      <div class="week-label">${label}</div>
+      <div class="week-count-badge ${badgeCls}">${officeDays}/5 office</div>
+    </div>
+    <div class="week-days" id="wdays-${dateKey(monday)}"></div>
+  `;
+  container.appendChild(card);
+  
+  const daysRow = card.querySelector('.week-days');
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri'];
+  
+  for (let d = 0; d < 5; d++) {
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + d);
+    const key = dateKey(day);
+    const status = attendanceData[key] || '';
+    const past = day < today;
+    const todayDay = isToday(day);
+    
+    const pip = status === 'office' ? '🏢' : status === 'wfh' ? '🏠' : '';
+    
+    const cell = document.createElement('div');
+    cell.className = `week-day-cell ${status} ${past && !todayDay ? 'past' : ''} ${todayDay ? 'today' : ''}`;
+    cell.innerHTML = `
+      <div class="day-name">${dayNames[d]}</div>
+      <div class="day-num">${day.getDate()}</div>
+      <div class="status-pip">${pip}</div>
+    `;
+    cell.onclick = () => openModal(day);
+    daysRow.appendChild(cell);
+  }
+}
+
+function changeWeekOffset(dir) {
+  weekOffset += dir;
+  renderWeekly();
+}
+
+// MODAL
+function openModal(d) {
+  selectedDate = d;
+  const key = dateKey(d);
+  const status = attendanceData[key] || '';
+  
+  document.getElementById('modalTitle').textContent = formatDate(d);
+  
+  // Highlight current
+  document.querySelectorAll('.modal-option').forEach(el => el.classList.remove('selected'));
+  if (status === 'office') document.querySelector('.office-opt').classList.add('selected');
+  else if (status === 'wfh') document.querySelector('.wfh-opt').classList.add('selected');
+  
+  document.getElementById('dayModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('dayModal').classList.remove('open');
+  selectedDate = null;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('dayModal')) closeModal();
+}
+
+async function setDay(status) {
+  if (!selectedDate) return;
+  const key = dateKey(selectedDate);
+  
+  if (status === 'clear') {
+    delete attendanceData[key];
+  } else {
+    attendanceData[key] = status;
+  }
+  
+  closeModal();
+  renderCalendar();
+  if (currentTab === 'weekly') renderWeekly();
+  updatePolicyBanner();
+  
+  // Save to Google Sheets
+  await saveDay(key, status === 'clear' ? '' : status);
+}
+
+// GOOGLE SHEETS SYNC
+function parseSheetDate(weekStr) {
+  // weekStr like "4 Jan", "11 Feb" etc — it's the Monday of the week
+  const parts = weekStr.trim().split(' ');
+  if (parts.length < 2) return null;
+  const day = parseInt(parts[0]);
+  const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+  const month = months[parts[1]];
+  if (isNaN(day) || month === undefined) return null;
+  
+  // Figure out year — assume current year, or last year if month is ahead of today
+  const today = new Date();
+  let year = today.getFullYear();
+  const testDate = new Date(year, month, day);
+  // If more than 6 months in the future, it's probably last year
+  if (testDate - today > 180 * 24 * 60 * 60 * 1000) year--;
+  
+  return new Date(year, month, day);
+}
+
+async function loadFromSheets() {
+  try {
+    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`, { method: 'GET' });
+    const data = await res.json();
+    if (data && data.rows) {
+      attendanceData = {};
+      data.rows.forEach(row => {
+        // row: { date: "YYYY-MM-DD", status: "office"|"wfh" }
+        if (row.date && row.status) {
+          attendanceData[row.date] = row.status;
+        }
+      });
+      return true;
+    }
+  } catch(e) {}
+  
+  // Fallback: try getData and parse existing format
+  try {
+    const res2 = await fetch(`${SCRIPT_URL}?action=getData`, { method: 'GET' });
+    const data2 = await res2.json();
+    if (data2 && data2.rows) {
+      attendanceData = {};
+      data2.rows.forEach(row => {
+        // row has week string and Mon/Tue/Wed/Thu/Fri values
+        const monday = parseSheetDate(row.week || '');
+        if (!monday) return;
+        const days = ['mon','tue','wed','thu','fri'];
+        days.forEach((d, i) => {
+          const val = (row[d] || '').toLowerCase().trim();
+          const date = new Date(monday);
+          date.setDate(monday.getDate() + i);
+          const key = dateKey(date);
+          if (val === 'yes') attendanceData[key] = 'office';
+          else if (val === 'no') attendanceData[key] = 'wfh';
+        });
+      });
+      return true;
+    }
+  } catch(e2) {}
+  
+  return false;
+}
+
+async function saveDay(dateStr, status) {
+  try {
+    const body = { action: 'saveAttendanceDay', date: dateStr, status };
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+  } catch(e) {
+    // Silent fail — data is in memory
+  }
+  showToast(status ? (status === 'office' ? '🏢 Saved as Office day' : '🏠 Saved as WFH') : '✕ Day cleared');
+}
+
+async function syncData() {
+  const btn = document.getElementById('syncBtn');
+  const icon = document.getElementById('syncIcon');
+  btn.classList.add('loading');
+  icon.style.display = 'inline-block';
+  icon.style.animation = 'spin 0.7s linear infinite';
+  
+  const ok = await loadFromSheets();
+  
+  btn.classList.remove('loading');
+  icon.style.animation = '';
+  
+  renderCalendar();
+  if (currentTab === 'weekly') renderWeekly();
+  updatePolicyBanner();
+  
+  showToast(ok ? '✓ Synced with Google Sheets' : '⚠️ Could not sync — using local data');
+}
+
+// TAB
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'calendar') || (i === 1 && tab === 'weekly'));
+  });
+  document.getElementById('calView').classList.toggle('active', tab === 'calendar');
+  document.getElementById('weekView').classList.toggle('active', tab === 'weekly');
+  if (tab === 'weekly') renderWeekly();
+}
+
+// TOAST
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// INIT
+async function init() {
+  currentMonth = new Date();
+  
+  // Load from sheets
+  await loadFromSheets();
+  
+  renderCalendar();
+  updatePolicyBanner();
+}
+
+init();
+</script>
+</body>
+</html>
