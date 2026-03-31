@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src https://script.google.com https://script.googleusercontent.com; script-src 'self' 'unsafe-inline' https://script.google.com https://script.googleusercontent.com;">
 <title>Office Attendance</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -798,7 +797,7 @@ async function toggleDay(d) {
 
   const eff=getStatus(d);
   showToast(eff==='office'?'🟢 In Office':eff==='planned'?'🔵 Planned Office':'⬜ WFH');
-  await saveDay(key, newSave||'');
+  saveDay(key, newSave||'');
 }
 
 // ── STORAGE ──────────────────────────────────────────────────
@@ -823,46 +822,63 @@ function loadLocal() {
   return false; // always fetch fresh from sheet
 }
 
-async function loadFromSheets() {
-  try {
-    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`, {
-      method: 'GET',
-      mode: 'cors',
-    });
-    const data = await res.json();
-    if (data && data.rows && data.rows.length > 0) {
-      attendanceData = {};
-      data.rows.forEach(r => { if (r.date && r.status) attendanceData[r.date] = r.status; });
-      saveLocal();
-      render();
-      return true;
-    }
-  } catch(e) {
-    console.warn('Fetch failed:', e);
-  }
-  render();
-  return false;
+function loadFromSheets() {
+  return new Promise(function(resolve) {
+    const cb = 'attCb_' + Date.now();
+    const sc = document.createElement('script');
+    let done = false;
+
+    const timer = setTimeout(function() {
+      if (!done) {
+        done = true;
+        try { document.head.removeChild(sc); } catch(e) {}
+        delete window[cb];
+        render();
+        resolve(false);
+      }
+    }, 10000);
+
+    window[cb] = function(data) {
+      if (!done) {
+        done = true;
+        clearTimeout(timer);
+        try { document.head.removeChild(sc); } catch(e) {}
+        delete window[cb];
+        if (data && data.rows) {
+          attendanceData = {};
+          data.rows.forEach(function(r) {
+            if (r.date && r.status) attendanceData[r.date] = r.status;
+          });
+          saveLocal();
+        }
+        render();
+        resolve(true);
+      }
+    };
+
+    sc.src = SCRIPT_URL + '?action=getAttendance&callback=' + cb;
+    document.head.appendChild(sc);
+  });
 }
 
-async function saveDay(dateStr, status) {
-  try {
-    const s=status||'clear';
-    await fetch(`${SCRIPT_URL}?action=saveAttendanceDay&date=${dateStr}&status=${s}`,
-      { redirect:'follow', mode:'no-cors' });
-  } catch(e) {}
+function saveDay(dateStr, status) {
+  const s = status || 'clear';
+  const sc = document.createElement('script');
+  sc.src = SCRIPT_URL + '?action=saveAttendanceDay&date=' + dateStr + '&status=' + s;
+  sc.onload = function() { try { document.head.removeChild(sc); } catch(e) {} };
+  sc.onerror = function() { try { document.head.removeChild(sc); } catch(e) {} };
+  document.head.appendChild(sc);
 }
 
 async function syncData() {
-  const btn=document.getElementById('syncBtn');
-  const icon=document.getElementById('syncIcon');
+  const btn = document.getElementById('syncBtn');
+  const icon = document.getElementById('syncIcon');
   btn.classList.add('loading');
-  icon.style.animation='spin 0.7s linear infinite';
-  // Clear cache so we always get fresh data from sheet
-  try { localStorage.removeItem('att2'); localStorage.removeItem('attendanceData'); } catch(e) {}
+  icon.style.animation = 'spin 0.7s linear infinite';
   attendanceData = {};
-  const ok=await loadFromSheets();
+  const ok = await loadFromSheets();
   btn.classList.remove('loading');
-  icon.style.animation='';
+  icon.style.animation = '';
   showToast(ok ? '✓ Synced — ' + Object.keys(attendanceData).length + ' days loaded' : '⚠ Could not reach sheet');
 }
 
