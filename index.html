@@ -572,7 +572,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyMLXC2GQ9ieeu3r0hUhFBigb_riv1NypZIJD90Y8mJvzNymOS-AgZphY12rMrzqxGCA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbygTPD7NysL0lpQqo14G7cQ6uErxjDtaqrgyHm8vHoQ-9bGBA4nl3d4XJyaW1qlLf4C/exec';
 
 // STATE
 let attendanceData = {}; // key: "YYYY-MM-DD", val: "office"|"wfh"
@@ -937,13 +937,11 @@ async function loadFromSheets() {
 
 async function saveDay(dateStr, status) {
   try {
-    const body = { action: 'saveAttendanceDay', date: dateStr, status };
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify(body)
-    });
+    const s = status || 'clear';
+    const url = `${SCRIPT_URL}?action=saveAttendanceDay&date=${dateStr}&status=${s}`;
+    await fetch(url, { redirect: 'follow', mode: 'no-cors' });
   } catch(e) {
-    // Silent fail — data is in memory
+    console.warn('Save error:', e);
   }
   showToast(status ? (status === 'office' ? '🏢 Saved as Office day' : '🏠 Saved as WFH') : '✕ Day cleared');
 }
