@@ -488,6 +488,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY0J9oEBjPAVS1AUCtl
 let attendanceData = {};
 let currentMonth = new Date();
 let currentTab = 'cal';
+let weeklyScrolled = false;
 
 // ── HELPERS ──────────────────────────────────────────────────
 function dateKey(d) {
@@ -813,8 +814,9 @@ function renderWeekly() {
     }
   }
 
-  // Scroll current week into view
-  if (currentCard) {
+  // Scroll current week into view only on first open
+  if (currentCard && !weeklyScrolled) {
+    weeklyScrolled = true;
     setTimeout(()=>currentCard.scrollIntoView({ behavior:'smooth', block:'center' }), 100);
   }
 }
@@ -937,7 +939,7 @@ function switchTab(tab) {
   });
   document.getElementById('calView').classList.toggle('active', tab==='cal');
   document.getElementById('weekView').classList.toggle('active', tab==='week');
-  if (tab==='week') renderWeekly();
+  if (tab==='week') { weeklyScrolled = false; renderWeekly(); }
 }
 
 function render() {
