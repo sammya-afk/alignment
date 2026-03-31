@@ -8,30 +8,31 @@
 <title>Office Attendance</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #F5F2EE;
-    --surface: #FFFFFF;
-    --surface2: #F0EDE8;
-    --border: #E2DDD6;
-    --text: #1A1714;
-    --text2: #6B6560;
-    --text3: #A09A93;
-    --office: #2D6A4F;
-    --office-light: #D8F3E3;
-    --office-text: #1B4332;
-    --planned: #1D4E89;
-    --planned-light: #DBEAFE;
-    --planned-text: #1e3a6e;
-    --good: #2D6A4F;
-    --warn: #B45309;
-    --bad: #C0392B;
-    --accent: #C4622D;
-    --radius: 14px;
-    --shadow: 0 2px 12px rgba(0,0,0,0.07);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-- { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+–bg: #F5F2EE;
+–surface: #FFFFFF;
+–surface2: #F0EDE8;
+–border: #E2DDD6;
+–text: #1A1714;
+–text2: #6B6560;
+–text3: #A09A93;
+–green: #2D6A4F;
+–green-light: #D8F3E3;
+–green-text: #1B4332;
+–blue: #1D4E89;
+–blue-light: #DBEAFE;
+–blue-text: #1e3a6e;
+–amber: #92400E;
+–amber-light: #FEF3C7;
+–red-light: #FFE8E8;
+–red-text: #7B1C1C;
+–accent: #C4622D;
+–radius: 14px;
+–shadow: 0 2px 12px rgba(0,0,0,0.07);
+–shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
 
 body {
 font-family: ‘DM Sans’, sans-serif;
@@ -42,115 +43,131 @@ max-width: 480px;
 margin: 0 auto;
 }
 
-/* HEADER */
+/* ── HEADER ── */
 .header {
 background: var(–text);
 color: white;
-padding: env(safe-area-inset-top, 16px) 24px 12px;
-padding-top: max(env(safe-area-inset-top), 16px);
+padding: 52px 20px 12px;
 position: sticky;
 top: 0;
 z-index: 100;
-box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+box-shadow: 0 2px 10px rgba(0,0,0,0.25);
 }
-.header-top {
+.header-row {
 display: flex;
 align-items: center;
 justify-content: space-between;
-margin-bottom: 8px;
+margin-bottom: 10px;
 }
 .header h1 {
 font-family: ‘DM Serif Display’, serif;
 font-size: 22px;
 font-weight: 400;
-line-height: 1.1;
-letter-spacing: -0.3px;
+line-height: 1;
 }
-.header h1 em {
-font-style: italic;
-color: #C4A882;
-}
+.header h1 em { font-style: italic; color: #C4A882; }
 .sync-btn {
 background: rgba(255,255,255,0.12);
 border: 1px solid rgba(255,255,255,0.2);
 color: white;
 border-radius: 20px;
-padding: 6px 14px;
+padding: 5px 12px;
 font-family: ‘DM Sans’, sans-serif;
 font-size: 12px;
 font-weight: 500;
 cursor: pointer;
-white-space: nowrap;
 display: flex;
 align-items: center;
-gap: 5px;
+gap: 4px;
 transition: background 0.2s;
+flex-shrink: 0;
 }
-.sync-btn:hover { background: rgba(255,255,255,0.2); }
-.sync-btn.loading { opacity: 0.6; pointer-events: none; }
-
-/* POLICY BANNER */
-.policy-banner {
-padding: 14px 16px;
-border-radius: 12px;
-display: flex;
-align-items: center;
-gap: 12px;
-font-size: 13px;
-font-weight: 500;
-background: var(–surface2);
-color: var(–text2);
-}
-.policy-banner.good { background: var(–office-light); color: var(–office-text); }
-.policy-banner.warn { background: #FEF3C7; color: #92400E; }
-.policy-banner.bad { background: #FFE8E8; color: #7B1C1C; }
-.policy-icon { font-size: 20px; flex-shrink: 0; }
-.policy-detail { font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 2px; }
-
-/* TAB BAR */
+.sync-btn.loading { opacity: 0.5; pointer-events: none; }
 .tab-bar {
 display: flex;
-background: rgba(255,255,255,0.15);
+background: rgba(255,255,255,0.12);
 border-radius: 10px;
 padding: 3px;
-margin: 0;
-width: 100%;
 }
 .tab-btn {
 flex: 1;
-padding: 8px 4px;
+padding: 7px;
 border: none;
 background: transparent;
 border-radius: 8px;
 font-family: ‘DM Sans’, sans-serif;
 font-size: 13px;
 font-weight: 500;
-color: rgba(255,255,255,0.55);
+color: rgba(255,255,255,0.5);
 cursor: pointer;
 transition: all 0.2s;
 }
 .tab-btn.active {
 background: rgba(255,255,255,0.2);
 color: white;
-box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-/* MAIN CONTENT */
-.content {
-padding: 20px 24px 100px;
+/* ── CONTENT ── */
+.content { padding: 16px 20px 100px; }
+
+/* ── BANNERS ── */
+.banner {
+display: flex;
+align-items: flex-start;
+gap: 10px;
+padding: 12px 14px;
+border-radius: 12px;
+font-size: 13px;
+font-weight: 500;
+margin-bottom: 8px;
+background: var(–surface2);
+color: var(–text2);
 }
-.week-section-title {
+.banner.good { background: var(–green-light); color: var(–green-text); }
+.banner.warn { background: var(–amber-light); color: var(–amber); }
+.banner.bad  { background: var(–red-light); color: var(–red-text); }
+.banner-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.banner-title { font-weight: 600; }
+.banner-sub { font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 2px; }
+
+/* ── STATS ROW ── */
+.stats-row {
+display: grid;
+grid-template-columns: 1fr 1fr 1fr;
+gap: 8px;
+margin: 12px 0 16px;
+}
+.stat-card {
+background: var(–surface);
+border-radius: 12px;
+padding: 12px 8px;
+text-align: center;
+box-shadow: var(–shadow);
+}
+.stat-card.good .stat-val { color: var(–green); }
+.stat-card.warn .stat-val { color: var(–amber); }
+.stat-card.bad  .stat-val { color: #C0392B; }
+.stat-val {
 font-family: ‘DM Serif Display’, serif;
-font-size: 16px; font-weight: 400;
-color: var(–text2); margin: 20px 0 10px;
+font-size: 28px;
+font-weight: 400;
+line-height: 1;
+margin-bottom: 4px;
+}
+.stat-lbl {
+font-size: 9px;
+font-weight: 600;
+letter-spacing: 0.5px;
+text-transform: uppercase;
+color: var(–text3);
 }
 
-/* SECTION HEADER */
+/* ── SECTION NAV ── */
 .section-nav {
 display: flex;
 align-items: center;
 justify-content: space-between;
-margin-bottom: 16px;
+margin-bottom: 12px;
 }
 .section-nav h2 {
 font-family: ‘DM Serif Display’, serif;
@@ -166,38 +183,48 @@ background: var(–surface);
 cursor: pointer;
 display: flex; align-items: center; justify-content: center;
 font-size: 14px;
-transition: all 0.15s;
 color: var(–text);
+transition: all 0.15s;
 }
 .nav-btn:hover { background: var(–surface2); }
 
-/* CALENDAR */
-.calendar-grid {
+/* ── LEGEND ── */
+.legend {
+display: flex;
+gap: 14px;
+margin-bottom: 12px;
+flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(–text2); }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.legend-dot.office  { background: var(–green-light); border: 1.5px solid var(–green); }
+.legend-dot.planned { background: var(–blue-light);  border: 1.5px solid var(–blue); }
+.legend-dot.wfh     { background: var(–surface); border: 1.5px solid var(–border); }
+
+/* ── CALENDAR ── */
+.cal-grid {
 background: var(–surface);
 border-radius: var(–radius);
 overflow: hidden;
 box-shadow: var(–shadow);
 }
-.cal-days-header {
+.cal-header {
 display: grid;
 grid-template-columns: repeat(7, 1fr);
 background: var(–surface2);
 border-bottom: 1px solid var(–border);
 }
-.cal-day-label {
+.cal-day-lbl {
 text-align: center;
-padding: 10px 0;
-font-size: 11px;
+padding: 8px 0;
+font-size: 10px;
 font-weight: 600;
 color: var(–text3);
 letter-spacing: 0.5px;
 text-transform: uppercase;
 }
-.cal-day-label.weekend { color: var(–border); }
-.cal-cells {
-display: grid;
-grid-template-columns: repeat(7, 1fr);
-}
+.cal-day-lbl.we { color: var(–border); }
+.cal-cells { display: grid; grid-template-columns: repeat(7, 1fr); }
 .cal-cell {
 aspect-ratio: 1;
 display: flex;
@@ -208,409 +235,247 @@ font-weight: 500;
 border-bottom: 1px solid var(–border);
 border-right: 1px solid var(–border);
 cursor: pointer;
-transition: all 0.15s;
+transition: opacity 0.15s;
 position: relative;
-flex-direction: column;
-gap: 2px;
+color: var(–text2);
 }
 .cal-cell:nth-child(7n) { border-right: none; }
-.cal-cell.empty { background: var(–bg); cursor: default; }
+.cal-cell.empty   { background: var(–bg); cursor: default; }
 .cal-cell.weekend { background: var(–bg); cursor: default; color: var(–text3); }
-.cal-cell.other-month { color: var(–text3); opacity: 0.4; }
-.cal-cell.today { font-weight: 700; }
+.cal-cell.office  { background: var(–green-light); color: var(–green-text); font-weight: 700; }
+.cal-cell.planned { background: var(–blue-light);  color: var(–blue-text);  font-weight: 600; }
+.cal-cell.wfh     { background: var(–surface); }
+.cal-cell:not(.empty):not(.weekend):hover { opacity: 0.7; }
+.cal-cell.today { font-weight: 800; }
 .cal-cell.today::after {
 content: ‘’;
 position: absolute;
-bottom: 4px;
-left: 50%;
+bottom: 3px; left: 50%;
 transform: translateX(-50%);
 width: 4px; height: 4px;
 border-radius: 50%;
 background: var(–accent);
 }
-.cal-cell.best8-week-start::before {
+.cal-cell.best8-mon::before {
 content: ‘★’;
 position: absolute;
-top: 2px;
-left: 3px;
+top: 1px; left: 2px;
 font-size: 7px;
-color: var(–office);
-opacity: 0.8;
+color: var(–green);
+opacity: 0.7;
 }
-.cal-cell.office { background: #D8F3E3; color: #1B4332; font-weight: 700; }
-.cal-cell.planned { background: #DBEAFE; color: #1e3a6e; font-weight: 600; }
-.cal-cell.wfh { background: var(–surface); color: var(–text2); }
-.cal-cell:not(.empty):not(.weekend):not(.other-month):hover { opacity: 0.75; }
-.cal-cell .day-dot { display: none; }
 
-/* WEEK VIEW */
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── WEEK CARDS ── */
 .week-card {
 background: var(–surface);
 border-radius: var(–radius);
 overflow: hidden;
 box-shadow: var(–shadow);
-margin-bottom: 12px;
+margin-bottom: 10px;
 border-left: 3px solid transparent;
 }
-.week-card.current-week {
-border-left: 3px solid var(–accent);
-box-shadow: var(–shadow-lg);
-}
-.week-card-header {
+.week-card.current { border-left-color: var(–accent); box-shadow: var(–shadow-lg); }
+.week-card.in-best8 { border-left-color: var(–green); }
+.week-card-head {
 display: flex;
 align-items: center;
 justify-content: space-between;
-padding: 14px 16px 10px;
+padding: 12px 14px 8px;
 border-bottom: 1px solid var(–border);
 }
-.week-label {
-font-size: 13px;
-font-weight: 600;
-color: var(–text2);
+.week-card-left { display: flex; align-items: center; gap: 8px; }
+.week-lbl { font-size: 12px; font-weight: 600; color: var(–text2); }
+.best8-tag {
+font-size: 9px; font-weight: 700;
+letter-spacing: 0.4px;
+color: var(–green);
+background: var(–green-light);
+border-radius: 6px;
+padding: 2px 6px;
+text-transform: uppercase;
 }
-.week-count-badge {
-font-size: 12px;
-font-weight: 600;
+.day-count {
+font-size: 11px; font-weight: 700;
 padding: 3px 10px;
 border-radius: 20px;
 }
-.week-count-badge.good { background: var(–office-light); color: var(–office-text); }
-.week-count-badge.warn { background: #FEF3C7; color: #92400E; }
-.week-count-badge.neutral { background: var(–surface2); color: var(–text2); }
-.week-card.in-best8 { border-left: 3px solid var(–office); }
-.best8-tag {
-font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
-color: var(–office); text-transform: uppercase;
-background: var(–office-light); border-radius: 6px;
-padding: 2px 7px;
-}
-.compliance-note {
-padding: 7px 14px;
-border-top: 1px solid var(–border);
-font-size: 11px; font-weight: 500; color: var(–text2);
-display: flex; align-items: center; gap: 6px;
-}
-.compliance-note.safe { color: var(–office); }
-.compliance-note.warn { color: #92400E; }
+.day-count.good { background: var(–green-light); color: var(–green-text); }
+.day-count.warn { background: var(–amber-light); color: var(–amber); }
+.day-count.none { background: var(–surface2); color: var(–text2); }
 .week-days {
 display: grid;
 grid-template-columns: repeat(5, 1fr);
-gap: 0;
 }
-.week-day-cell {
+.wday {
 display: flex;
 flex-direction: column;
 align-items: center;
-padding: 10px 4px;
+padding: 8px 2px;
 cursor: pointer;
-transition: all 0.15s;
 border-right: 1px solid var(–border);
-gap: 6px;
+gap: 4px;
+transition: background 0.1s;
 }
-.week-day-cell:last-child { border-right: none; }
-.week-day-cell .day-name {
-font-size: 10px;
-font-weight: 600;
-letter-spacing: 0.5px;
-text-transform: uppercase;
-color: var(–text3);
-}
-.week-day-cell .day-num {
-font-size: 15px;
-font-weight: 600;
-color: var(–text2);
-}
-.week-day-cell .status-pip {
-width: 28px; height: 28px;
+.wday:last-child { border-right: none; }
+.wday:hover { background: var(–surface2); }
+.wday-name { font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(–text3); }
+.wday-num  { font-size: 14px; font-weight: 600; color: var(–text2); }
+.wday-num.today { color: var(–accent); font-weight: 800; }
+.wday-pip {
+width: 26px; height: 26px;
 border-radius: 50%;
 border: 2px solid var(–border);
 display: flex; align-items: center; justify-content: center;
-font-size: 12px;
-transition: all 0.15s;
+font-size: 11px;
 background: var(–surface2);
 }
-.week-day-cell.office .status-pip { background: #D8F3E3; border-color: #2D6A4F; }
-.week-day-cell.planned .status-pip { background: #DBEAFE; border-color: #1D4E89; }
-.week-day-cell.wfh .status-pip { background: var(–surface2); border-color: var(–border); }
-.week-day-cell.today .day-num { color: var(–accent); }
-.week-day-cell:hover { background: var(–surface2); }
-.week-day-cell.past { opacity: 0.6; }
+.wday.office  .wday-pip { background: var(–green-light); border-color: var(–green); }
+.wday.planned .wday-pip { background: var(–blue-light);  border-color: var(–blue); }
+.wday.wfh     .wday-pip { background: var(–surface2); border-color: var(–border); }
+.compliance-note {
+padding: 6px 14px;
+border-top: 1px solid var(–border);
+font-size: 11px;
+font-weight: 500;
+}
+.compliance-note.ok   { color: var(–green); }
+.compliance-note.warn { color: var(–amber); }
 
-/* STATS CARD */
-.stats-row {
-display: grid;
-grid-template-columns: 1fr 1fr 1fr;
-gap: 10px;
-margin-bottom: 16px;
-}
-.stat-card {
-background: var(–surface);
-border-radius: 12px;
-padding: 14px 12px;
-box-shadow: var(–shadow);
-text-align: center;
-}
-.stat-value {
-font-family: ‘DM Serif Display’, serif;
-font-size: 28px;
-font-weight: 400;
-line-height: 1;
-margin-bottom: 4px;
-}
-.stat-label {
-font-size: 10px;
-font-weight: 600;
-letter-spacing: 0.5px;
-text-transform: uppercase;
-color: var(–text3);
-}
-.stat-card.highlight .stat-value { color: var(–good); }
-.stat-card.warn-stat .stat-value { color: var(–warn); }
-.stat-card.bad-stat .stat-value { color: var(–bad); }
-
-/* DAY PICKER MODAL */
-.modal-overlay {
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.4);
-z-index: 200;
-display: none;
-align-items: flex-end;
-backdrop-filter: blur(4px);
-}
-.modal-overlay.open { display: flex; }
-.modal-sheet {
-background: var(–surface);
-border-radius: 20px 20px 0 0;
-width: 100%;
-padding: 20px 24px 40px;
-animation: slideUp 0.25s ease;
-}
-@keyframes slideUp {
-from { transform: translateY(100%); }
-to { transform: translateY(0); }
-}
-.modal-handle {
-width: 36px; height: 4px;
-background: var(–border);
-border-radius: 2px;
-margin: 0 auto 20px;
-}
-.modal-title {
-font-family: ‘DM Serif Display’, serif;
-font-size: 20px;
-margin-bottom: 6px;
-}
-.modal-subtitle { font-size: 13px; color: var(–text2); margin-bottom: 20px; }
-.modal-options { display: flex; flex-direction: column; gap: 10px; }
-.modal-option {
-display: flex;
-align-items: center;
-gap: 14px;
-padding: 16px;
-border-radius: 12px;
-border: 2px solid var(–border);
-cursor: pointer;
-transition: all 0.15s;
-background: var(–surface);
-}
-.modal-option:hover { border-color: var(–text3); }
-.modal-option.selected { border-color: currentColor; }
-.modal-option.office-opt { color: var(–office); }
-.modal-option.office-opt.selected { background: var(–office-light); }
-.modal-option.wfh-opt { color: var(–wfh); }
-.modal-option.wfh-opt.selected { background: var(–wfh-light); }
-.modal-option.clear-opt { color: var(–text2); }
-.modal-option.clear-opt.selected { background: var(–surface2); }
-.modal-opt-icon { font-size: 24px; }
-.modal-opt-label { font-size: 15px; font-weight: 600; }
-.modal-opt-sub { font-size: 12px; font-weight: 400; color: var(–text3); }
-.modal-close {
-margin-top: 12px;
-width: 100%;
-padding: 14px;
-border-radius: 12px;
-border: none;
-background: var(–surface2);
-font-family: ‘DM Sans’, sans-serif;
-font-size: 15px;
-font-weight: 600;
-color: var(–text2);
-cursor: pointer;
-}
-
-/* LEGEND */
-.legend {
-display: flex;
-gap: 16px;
-flex-wrap: wrap;
-margin-bottom: 16px;
-}
-.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(–text2); }
-.legend-dot { width: 10px; height: 10px; border-radius: 3px; }
-.legend-dot.office { background: var(–office-light); border: 1.5px solid var(–office); }
-.legend-dot.planned { background: var(–planned-light); border: 1.5px solid var(–planned); }
-.legend-dot.wfh { background: var(–surface); border: 1.5px solid var(–border); }
-
-/* TOAST */
+/* ── TOAST ── */
 .toast {
 position: fixed;
-bottom: 24px;
-left: 50%;
+bottom: 24px; left: 50%;
 transform: translateX(-50%) translateY(80px);
 background: var(–text);
 color: white;
-padding: 10px 20px;
+padding: 9px 18px;
 border-radius: 20px;
 font-size: 13px;
 font-weight: 500;
 z-index: 300;
 transition: transform 0.3s ease;
 white-space: nowrap;
+pointer-events: none;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-/* LOADING */
-.loading-screen {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-padding: 60px 24px;
-gap: 12px;
-color: var(–text2);
-font-size: 14px;
-}
-.spinner {
-width: 28px; height: 28px;
-border: 3px solid var(–border);
-border-top-color: var(–text);
-border-radius: 50%;
-animation: spin 0.7s linear infinite;
-}
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.view-section { display: none; }
-.view-section.active { display: block; }
-
-.week-section-title {
-font-family: ‘DM Serif Display’, serif;
-font-size: 16px;
-font-weight: 400;
-color: var(–text2);
-margin: 20px 0 10px;
-}
 </style>
 
 </head>
 <body>
 
 <div class="header">
-  <div class="header-top">
-    <h1>Office<br><em>Attendance</em></h1>
+  <div class="header-row">
+    <h1>Office <em>Attendance</em></h1>
     <button class="sync-btn" id="syncBtn" onclick="syncData()">
       <span id="syncIcon">⟳</span> Sync
     </button>
   </div>
   <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('calendar')">📅 Calendar</button>
-    <button class="tab-btn" onclick="switchTab('weekly')">📋 Weekly</button>
+    <button class="tab-btn active" onclick="switchTab('cal')">📅 Calendar</button>
+    <button class="tab-btn"        onclick="switchTab('week')">📋 Weekly</button>
   </div>
 </div>
 
 <div class="content">
-  <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
-    <div class="policy-banner good" id="policyBanner">
-      <div class="policy-icon" id="policyIcon">✅</div>
-      <div>
-        <div id="policyText">Loading...</div>
-        <div class="policy-detail" id="policyDetail"></div>
-      </div>
-    </div>
-    <div class="policy-banner" id="forecastBanner">
-      <div class="policy-icon">🔮</div>
-      <div>
-        <div id="forecastText">Calculating forecast...</div>
-        <div class="policy-detail" id="forecastDetail"></div>
-      </div>
+
+  <!-- BANNERS -->
+
+  <div class="banner good" id="pastBanner">
+    <div class="banner-icon">✅</div>
+    <div>
+      <div class="banner-title" id="pastTitle">Loading...</div>
+      <div class="banner-sub"  id="pastSub"></div>
     </div>
   </div>
+  <div class="banner" id="forecastBanner">
+    <div class="banner-icon">🔮</div>
+    <div>
+      <div class="banner-title" id="forecastTitle">Calculating...</div>
+      <div class="banner-sub"  id="forecastSub"></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+
+  <div class="stats-row">
+    <div class="stat-card" id="s1card">
+      <div class="stat-val" id="s1">—</div>
+      <div class="stat-lbl">Past 8wk</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="s2">—</div>
+      <div class="stat-lbl">This Week</div>
+    </div>
+    <div class="stat-card" id="s3card">
+      <div class="stat-val" id="s3">—</div>
+      <div class="stat-lbl">Forecast</div>
+    </div>
+  </div>
+
   <!-- CALENDAR VIEW -->
-  <div class="view-section active" id="calView">
-    <div class="stats-row">
-      <div class="stat-card" id="s1card"><div class="stat-value" id="s1">—</div><div class="stat-label">Past 8wk</div></div>
-      <div class="stat-card"><div class="stat-value" id="s2">—</div><div class="stat-label">This Week</div></div>
-      <div class="stat-card" id="s3card"><div class="stat-value" id="s3">—</div><div class="stat-label">Forecast</div></div>
+
+  <div class="view active" id="calView">
+    <div class="section-nav">
+      <h2 id="calTitle">—</h2>
+      <div class="nav-arrows">
+        <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+        <button class="nav-btn" onclick="changeMonth(1)">›</button>
+      </div>
     </div>
-
-```
-<div class="section-nav">
-  <h2 id="calTitle">March 2025</h2>
-  <div class="nav-arrows">
-    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
-    <button class="nav-btn" onclick="changeMonth(1)">›</button>
-  </div>
-</div>
-
-<div class="legend">
-  <div class="legend-item"><div class="legend-dot office"></div>In Office</div>
-  <div class="legend-item"><div class="legend-dot planned"></div>Planned Office</div>
-  <div class="legend-item"><div class="legend-dot wfh"></div>WFH</div>
-</div>
-
-<div class="calendar-grid">
-  <div class="cal-days-header">
-    <div class="cal-day-label weekend">Su</div>
-    <div class="cal-day-label">Mo</div>
-    <div class="cal-day-label">Tu</div>
-    <div class="cal-day-label">We</div>
-    <div class="cal-day-label">Th</div>
-    <div class="cal-day-label">Fr</div>
-    <div class="cal-day-label weekend">Sa</div>
-  </div>
-  <div class="cal-cells" id="calCells"></div>
-</div>
-```
-
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot office"></div>In Office</div>
+      <div class="legend-item"><div class="legend-dot planned"></div>Planned Office</div>
+      <div class="legend-item"><div class="legend-dot wfh"></div>WFH</div>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-header">
+        <div class="cal-day-lbl we">Su</div>
+        <div class="cal-day-lbl">Mo</div>
+        <div class="cal-day-lbl">Tu</div>
+        <div class="cal-day-lbl">We</div>
+        <div class="cal-day-lbl">Th</div>
+        <div class="cal-day-lbl">Fr</div>
+        <div class="cal-day-lbl we">Sa</div>
+      </div>
+      <div class="cal-cells" id="calCells"></div>
+    </div>
   </div>
 
   <!-- WEEKLY VIEW -->
 
-  <div class="view-section" id="weekView">
+  <div class="view" id="weekView">
     <div class="section-nav">
-      <h2 id="weekTitle">Rolling 12-Week View</h2>
+      <h2>Rolling 13 Weeks</h2>
     </div>
-    <div id="rollingCards"></div>
+    <div id="weekCards"></div>
   </div>
-</div>
 
-<!-- No modal — one-click toggle -->
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY0J9oEBjPAVS1AUCtlgLlhx6ROCP7eCa2meC61Odn9zYrHUjzrJ-lsl1_xq46UiqS/exec';
 
-// STATE
-let attendanceData = {}; // key: "YYYY-MM-DD", val: "office"|"wfh"
+let attendanceData = {};
 let currentMonth = new Date();
-let weekOffset = 0;
-let selectedDate = null;
-let currentTab = 'calendar';
+let currentTab = 'cal';
 
-// Helpers
+// ── HELPERS ──────────────────────────────────────────────────
 function dateKey(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return y + '-' + m + '-' + day;
+  return d.toISOString().split('T')[0];
 }
 
 function getMonday(d) {
   const dt = new Date(d);
   const day = dt.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  dt.setDate(dt.getDate() + diff);
+  dt.setDate(dt.getDate() - (day === 0 ? 6 : day - 1));
   dt.setHours(0,0,0,0);
   return dt;
 }
@@ -619,541 +484,387 @@ function isWeekend(d) { return d.getDay() === 0 || d.getDay() === 6; }
 
 function isToday(d) {
   const t = new Date();
-  return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
-}
-
-function isFuture(d) {
-  const t = new Date(); t.setHours(0,0,0,0);
-  return d > t;
-}
-
-function formatDate(d) {
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  return d.getDate()===t.getDate() && d.getMonth()===t.getMonth() && d.getFullYear()===t.getFullYear();
 }
 
 function formatMonthYear(d) {
   return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
-function formatWeekLabel(monday) {
-  const friday = new Date(monday); friday.setDate(monday.getDate() + 4);
-  const m1 = monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const m2 = friday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function formatWeekLabel(mon) {
+  const fri = new Date(mon); fri.setDate(mon.getDate()+4);
+  const m1 = mon.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  const m2 = fri.toLocaleDateString('en-US', { month:'short', day:'numeric' });
   return `${m1} – ${m2}`;
 }
 
-// Returns effective status for any day
-function getEffectiveStatus(d) {
+// ── STATUS LOGIC ─────────────────────────────────────────────
+function getStatus(d) {
   const today = new Date(); today.setHours(0,0,0,0);
   const key = dateKey(d);
   const saved = attendanceData[key];
-  const isFuture = d > today;
+  const future = d > today;
 
-  if (saved === 'office') return isFuture ? 'planned' : 'office'; // future saved office = blue
-  if (saved === 'wfh') return 'wfh'; // explicit wfh override
-  if (!isFuture) return 'wfh'; // past unlogged = wfh
-
-  // Future defaults: Tue/Wed/Thu = planned office, Mon/Fri = wfh
+  if (saved === 'office') return future ? 'planned' : 'office';
+  if (saved === 'wfh')    return 'wfh';
+  if (!future)            return 'wfh';
   const dow = d.getDay();
-  return (dow === 2 || dow === 3 || dow === 4) ? 'planned' : 'wfh';
+  return (dow===2||dow===3||dow===4) ? 'planned' : 'wfh';
 }
 
-function isOfficeDay(status) {
-  return status === 'office' || status === 'planned';
-}
+function isOffice(status) { return status==='office'||status==='planned'; }
 
-function calcWeekOfficeDays(monday, useEffective) {
-  let count = 0;
-  for (let d = 0; d < 5; d++) {
-    const day = new Date(monday);
-    day.setDate(monday.getDate() + d);
-    const status = useEffective ? getEffectiveStatus(day) : (attendanceData[dateKey(day)] || 'wfh');
-    if (isOfficeDay(status)) count++;
+function weekOfficeDays(monday) {
+  let n=0;
+  for (let i=0;i<5;i++) {
+    const d=new Date(monday); d.setDate(monday.getDate()+i);
+    if (isOffice(getStatus(d))) n++;
   }
-  return count;
+  return n;
 }
 
-// Past policy: best 8 of last 12 complete weeks (real data only)
-function calcPastPolicy() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const thisMonday = getMonday(today);
-  const weeks = [];
-  for (let i = 1; i <= 12; i++) {
-    const mon = new Date(thisMonday);
-    mon.setDate(mon.getDate() - i * 7);
-    weeks.push(calcWeekOfficeDays(mon, false));
+// ── POLICY ───────────────────────────────────────────────────
+function calcPast() {
+  const today=new Date(); today.setHours(0,0,0,0);
+  const thisMon=getMonday(today);
+  const weeks=[];
+  for (let i=1;i<=12;i++) {
+    const m=new Date(thisMon); m.setDate(thisMon.getDate()-i*7);
+    weeks.push({ key:dateKey(m), days:weekOfficeDays(m) });
   }
-  const sorted = [...weeks].sort((a, b) => b - a);
-  const best8 = sorted.slice(0, 8).reduce((s, v) => s + v, 0);
-  // This week so far
-  let thisWeek = 0;
-  for (let d = 0; d < 5; d++) {
-    const day = new Date(thisMonday); day.setDate(thisMonday.getDate() + d);
-    if (day <= today && isOfficeDay(attendanceData[dateKey(day)] || '')) thisWeek++;
+  weeks.sort((a,b)=>b.days-a.days);
+  const best8keys = new Set(weeks.slice(0,8).map(w=>w.key));
+  const best8 = weeks.slice(0,8).reduce((s,w)=>s+w.days,0);
+  let thisWeek=0;
+  for (let i=0;i<5;i++) {
+    const d=new Date(thisMon); d.setDate(thisMon.getDate()+i);
+    if (d<=today && isOffice(getStatus(d))) thisWeek++;
   }
-  return { best8, thisWeek };
+  return { best8, thisWeek, best8keys };
 }
 
-// Forecast: best 8 of rolling 12 weeks centered on today (past real + future planned)
-function calcForecastPolicy() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const thisMonday = getMonday(today);
-  const weeks = [];
-  for (let i = -6; i <= 5; i++) {
-    const mon = new Date(thisMonday);
-    mon.setDate(mon.getDate() + i * 7);
-    weeks.push(calcWeekOfficeDays(mon, true));
+function calcForecast() {
+  const today=new Date(); today.setHours(0,0,0,0);
+  const thisMon=getMonday(today);
+  const weeks=[];
+  for (let i=-6;i<=5;i++) {
+    const m=new Date(thisMon); m.setDate(thisMon.getDate()+i*7);
+    weeks.push(weekOfficeDays(m));
   }
-  const sorted = [...weeks].sort((a, b) => b - a);
-  return sorted.slice(0, 8).reduce((s, v) => s + v, 0);
+  weeks.sort((a,b)=>b-a);
+  return weeks.slice(0,8).reduce((s,v)=>s+v,0);
 }
 
-// Returns a Set of monday dateKeys that are in the best 8 of the last 12 complete weeks
-function getBest8Mondays() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const thisMonday = getMonday(today);
-  const weeks = [];
-  for (let i = 1; i <= 12; i++) {
-    const mon = new Date(thisMonday);
-    mon.setDate(mon.getDate() - i * 7);
-    weeks.push({ key: dateKey(mon), days: calcWeekOfficeDays(mon, false) });
+function complianceNote(monday) {
+  const today=new Date(); today.setHours(0,0,0,0);
+  if (monday<=today) return null;
+  const thisMon=getMonday(today);
+  const others=[];
+  for (let i=-6;i<=5;i++) {
+    const m=new Date(thisMon); m.setDate(thisMon.getDate()+i*7);
+    if (dateKey(m)===dateKey(monday)) continue;
+    others.push(weekOfficeDays(m));
   }
-  // Sort by days desc, take top 8
-  weeks.sort((a, b) => b.days - a.days);
-  const best8 = new Set(weeks.slice(0, 8).map(w => w.key));
-  return best8;
+  others.sort((a,b)=>b-a);
+  const best7=others.slice(0,7).reduce((s,v)=>s+v,0);
+  const needed=Math.max(0,24-best7);
+  const planned=weekOfficeDays(monday);
+  return { needed, planned, ok: planned>=needed };
 }
 
-// For a given future monday, returns how many more office days needed
-// to stay in compliance if this week were to count in a rolling 12
-function getWeekComplianceNote(monday) {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const isFuture = monday > today;
-  const officeDays = calcWeekOfficeDays(monday, true);
+// ── UI UPDATE ────────────────────────────────────────────────
+function updateBanners() {
+  const { best8, thisWeek, best8keys } = calcPast();
+  const forecast = calcForecast();
 
-  if (!isFuture) return null; // only show for future
-
-  // Simulate: what's the forecast best-8 total if this week has 0,1,2,3 days?
-  // We want to tell the user: "you need X days this week to stay at 24"
-  const thisMonday = getMonday(today);
-  const allWeeks = [];
-  for (let i = -6; i <= 5; i++) {
-    const mon = new Date(thisMonday);
-    mon.setDate(mon.getDate() + i * 7);
-    if (dateKey(mon) === dateKey(monday)) continue; // exclude this week
-    allWeeks.push(calcWeekOfficeDays(mon, true));
-  }
-  allWeeks.sort((a, b) => b - a);
-  const best7 = allWeeks.slice(0, 7).reduce((s, v) => s + v, 0);
-  const needed = Math.max(0, 24 - best7);
-  return { officeDays, needed, safe: officeDays >= needed };
-}
-
-function updatePolicyBanner() {
-  const { best8, thisWeek } = calcPastPolicy();
-  const forecast = calcForecastPolicy();
-
-  // Stats row
+  // Stats
   document.getElementById('s1').textContent = best8;
   document.getElementById('s2').textContent = thisWeek;
   document.getElementById('s3').textContent = forecast;
-  const s1card = document.getElementById('s1card');
-  s1card.className = 'stat-card ' + (best8 >= 24 ? 'highlight' : best8 >= 20 ? 'warn-stat' : 'bad-stat');
-  const s3card = document.getElementById('s3card');
-  s3card.className = 'stat-card ' + (forecast >= 24 ? 'highlight' : forecast >= 20 ? 'warn-stat' : 'bad-stat');
+  document.getElementById('s1card').className = 'stat-card ' + (best8>=24?'good':best8>=20?'warn':'bad');
+  document.getElementById('s3card').className = 'stat-card ' + (forecast>=24?'good':forecast>=20?'warn':'bad');
 
   // Past banner
-  const banner = document.getElementById('policyBanner');
-  const text = document.getElementById('policyText');
-  const detail = document.getElementById('policyDetail');
+  const pb = document.getElementById('pastBanner');
   const needed = 24 - best8;
-  if (best8 >= 24) {
-    banner.className = 'policy-banner good';
-    text.textContent = `Policy Aligned — ${best8} days in best 8 weeks`;
-    detail.textContent = `${best8 - 24} days above the 24-day minimum`;
+  if (best8>=24) {
+    pb.className='banner good';
+    document.getElementById('pastTitle').textContent=`Policy Aligned — ${best8} days in best 8 weeks`;
+    document.getElementById('pastSub').textContent=`${best8-24} day${best8-24!==1?'s':''} above the 24-day minimum`;
   } else {
-    banner.className = 'policy-banner ' + (needed <= 4 ? 'warn' : 'bad');
-    text.textContent = `${needed} more office days needed`;
-    detail.textContent = `${best8} / 24 days across best 8 of last 12 weeks`;
+    pb.className='banner '+(needed<=4?'warn':'bad');
+    document.getElementById('pastTitle').textContent=`${needed} more office day${needed!==1?'s':''} needed`;
+    document.getElementById('pastSub').textContent=`${best8} / 24 days across best 8 of last 12 weeks`;
   }
 
   // Forecast banner
   const fb = document.getElementById('forecastBanner');
-  const ft = document.getElementById('forecastText');
-  const fd = document.getElementById('forecastDetail');
-  if (forecast >= 24) {
-    fb.className = 'policy-banner good';
-    ft.textContent = `On track — ${forecast} days projected`;
-    fd.textContent = 'Based on past + Tue/Wed/Thu planned office';
+  const fneeded = 24-forecast;
+  if (forecast>=24) {
+    fb.className='banner good';
+    document.getElementById('forecastTitle').textContent=`On track — ${forecast} days projected`;
+    document.getElementById('forecastSub').textContent='Based on past + Tue/Wed/Thu planned office';
   } else {
-    const fneeded = 24 - forecast;
-    fb.className = 'policy-banner ' + (fneeded <= 4 ? 'warn' : 'bad');
-    ft.textContent = `Projected short by ${fneeded} days`;
-    fd.textContent = `${forecast} / 24 projected across best 8 of rolling 12 weeks`;
+    fb.className='banner '+(fneeded<=4?'warn':'bad');
+    document.getElementById('forecastTitle').textContent=`Projected short by ${fneeded} day${fneeded!==1?'s':''}`;
+    document.getElementById('forecastSub').textContent=`${forecast} / 24 projected across best 8 of rolling 12 weeks`;
   }
+
+  return best8keys;
 }
 
-// CALENDAR VIEW
+// ── CALENDAR ─────────────────────────────────────────────────
 function renderCalendar() {
+  const best8keys = updateBanners();
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   document.getElementById('calTitle').textContent = formatMonthYear(currentMonth);
-  
+
   const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const startDow = firstDay.getDay(); // 0=Sun
-  
+  const lastDay  = new Date(year, month+1, 0);
   const cells = document.getElementById('calCells');
   cells.innerHTML = '';
-  
-  // Fill empty cells before
-  for (let i = 0; i < startDow; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'cal-cell empty';
-    cells.appendChild(cell);
+
+  for (let i=0; i<firstDay.getDay(); i++) {
+    const el=document.createElement('div');
+    el.className='cal-cell empty';
+    cells.appendChild(el);
   }
-  
-  const best8 = getBest8Mondays();
 
-  for (let day = 1; day <= lastDay.getDate(); day++) {
+  for (let day=1; day<=lastDay.getDate(); day++) {
     const d = new Date(year, month, day);
-    const effectiveStatus = getEffectiveStatus(d);
-
+    const el = document.createElement('div');
     let cls = 'cal-cell';
     if (isWeekend(d)) {
       cls += ' weekend';
     } else {
-      cls += ' ' + effectiveStatus;
+      cls += ' ' + getStatus(d);
       if (isToday(d)) cls += ' today';
-      // Mark monday of best-8 weeks with a subtle indicator
-      if (d.getDay() === 1 && best8.has(dateKey(d))) cls += ' best8-week-start';
+      if (d.getDay()===1 && best8keys.has(dateKey(d))) cls += ' best8-mon';
     }
-
-    const cell = document.createElement('div');
-    cell.className = cls;
-    cell.innerHTML = `<span>${day}</span>`;
-
-    if (!isWeekend(d)) {
-      cell.onclick = () => toggleDay(d);
-    }
-
-    cells.appendChild(cell);
+    el.className = cls;
+    el.textContent = day;
+    if (!isWeekend(d)) el.onclick = ()=>toggleDay(d);
+    cells.appendChild(el);
   }
-  
-  // Fill remaining
-  const totalCells = startDow + lastDay.getDate();
-  const remainder = totalCells % 7;
-  if (remainder > 0) {
-    for (let i = 0; i < 7 - remainder; i++) {
-      const cell = document.createElement('div');
-      cell.className = 'cal-cell empty';
-      cells.appendChild(cell);
-    }
+
+  const total = firstDay.getDay() + lastDay.getDate();
+  const rem = total % 7;
+  if (rem>0) for (let i=0;i<7-rem;i++) {
+    const el=document.createElement('div');
+    el.className='cal-cell empty';
+    cells.appendChild(el);
   }
 }
 
 function changeMonth(dir) {
-  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + dir, 1);
+  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth()+dir, 1);
   renderCalendar();
 }
 
-// WEEKLY VIEW
+// ── WEEKLY ───────────────────────────────────────────────────
 function renderWeekly() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const thisMonday = getMonday(today);
+  updateBanners();
+  const { best8keys } = calcPast();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const thisMon=getMonday(today);
+  const container=document.getElementById('weekCards');
+  container.innerHTML='';
 
-  const rolling = document.getElementById('rollingCards');
-  rolling.innerHTML = '';
+  for (let i=-6;i<=6;i++) {
+    const mon=new Date(thisMon); mon.setDate(thisMon.getDate()+i*7);
+    const isCurrent=i===0;
+    const isPast=mon<thisMon;
+    const inBest8=isPast && best8keys.has(dateKey(mon));
+    const days=weekOfficeDays(mon);
 
-  // Header label
-  document.getElementById('weekTitle').textContent = 'Rolling 12-Week View';
+    const card=document.createElement('div');
+    card.className='week-card'+(isCurrent?' current':inBest8?' in-best8':'');
 
-  const best8 = getBest8Mondays();
+    const badgeCls=days>=3?'good':days>0?'warn':'none';
+    const label=isCurrent?'This Week':formatWeekLabel(mon);
+    const best8html=inBest8?'<span class="best8-tag">★ Best 8</span>':'';
 
-  // Show 6 weeks back → 6 weeks forward (13 weeks total, current in middle)
-  for (let i = -6; i <= 6; i++) {
-    const mon = new Date(thisMonday);
-    mon.setDate(mon.getDate() + i * 7);
-    const isPast = mon < thisMonday;
-    const isCurrent = i === 0;
-    renderWeekCardInto(rolling, mon, true, best8, isPast, isCurrent);
-  }
-}
-
-function renderWeekCardInto(container, monday, interactive, best8Set, isPast, isCurrent) {
-  const today = new Date(); today.setHours(0,0,0,0);
-
-  let officeDays = 0;
-  for (let d = 0; d < 5; d++) {
-    const day = new Date(monday); day.setDate(monday.getDate() + d);
-    if (isOfficeDay(getEffectiveStatus(day))) officeDays++;
-  }
-
-  const inBest8 = best8Set && isPast && best8Set.has(dateKey(monday));
-  const card = document.createElement('div');
-  card.className = 'week-card' + (inBest8 ? ' in-best8' : '') + (isCurrent ? ' current-week' : '');
-
-  const badgeCls = officeDays >= 3 ? 'good' : officeDays > 0 ? 'warn' : 'neutral';
-  const label = isCurrent ? 'This Week' : formatWeekLabel(monday);
-  const best8Badge = inBest8 ? '<span class="best8-tag">★ Best 8</span>' : '';
-
-  card.innerHTML = `
-    <div class="week-card-header">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="week-label">${label}</div>
-        ${best8Badge}
+    card.innerHTML=`
+      <div class="week-card-head">
+        <div class="week-card-left">
+          <div class="week-lbl">${label}</div>
+          ${best8html}
+        </div>
+        <div class="day-count ${badgeCls}">${days} day${days!==1?'s':''}</div>
       </div>
-      <div class="week-count-badge ${badgeCls}">${officeDays} day${officeDays !== 1 ? 's' : ''}</div>
-    </div>
-    <div class="week-days"></div>
-  `;
-  container.appendChild(card);
-
-  const daysRow = card.querySelector('.week-days');
-  const dayNames = ['Mon','Tue','Wed','Thu','Fri'];
-
-  for (let d = 0; d < 5; d++) {
-    const day = new Date(monday); day.setDate(monday.getDate() + d);
-    const effectiveStatus = getEffectiveStatus(day);
-    const todayDay = isToday(day);
-    const pip = effectiveStatus === 'office' ? '🟢' : effectiveStatus === 'planned' ? '🔵' : '⬜';
-
-    const cell = document.createElement('div');
-    cell.className = `week-day-cell ${effectiveStatus} ${todayDay ? 'today' : ''}`;
-    cell.innerHTML = `
-      <div class="day-name">${dayNames[d]}</div>
-      <div class="day-num">${day.getDate()}</div>
-      <div class="status-pip">${pip}</div>
+      <div class="week-days"></div>
     `;
-    cell.onclick = () => toggleDay(day);
-    daysRow.appendChild(cell);
-  }
+    container.appendChild(card);
 
-  // Future weeks: show compliance note
-  if (!isPast && !isCurrent) {
-    const note = getWeekComplianceNote(monday);
-    if (note) {
-      const noteEl = document.createElement('div');
-      noteEl.className = 'compliance-note ' + (note.safe ? 'safe' : 'warn');
-      noteEl.innerHTML = note.safe
-        ? `✓ On track — ${note.officeDays} office day${note.officeDays !== 1 ? 's' : ''} planned`
-        : `⚠ Need ${note.needed} office day${note.needed !== 1 ? 's' : ''} to stay compliant`;
-      card.appendChild(noteEl);
+    const daysRow=card.querySelector('.week-days');
+    const names=['Mon','Tue','Wed','Thu','Fri'];
+    for (let d=0;d<5;d++) {
+      const day=new Date(mon); day.setDate(mon.getDate()+d);
+      const status=getStatus(day);
+      const pip=status==='office'?'🟢':status==='planned'?'🔵':'⬜';
+      const cell=document.createElement('div');
+      cell.className=`wday ${status}`;
+      cell.innerHTML=`
+        <div class="wday-name">${names[d]}</div>
+        <div class="wday-num${isToday(day)?' today':''}">${day.getDate()}</div>
+        <div class="wday-pip">${pip}</div>
+      `;
+      cell.onclick=()=>toggleDay(day);
+      daysRow.appendChild(cell);
     }
-  }
-}
 
-// ONE-CLICK TOGGLE
-async function toggleDay(d) {
-  const key = dateKey(d);
-  const today = new Date(); today.setHours(0,0,0,0);
-  const isFuture = d > today;
-  const current = attendanceData[key]; // what's explicitly saved
-  const dow = d.getDay();
-  const defaultPlanned = isFuture && (dow === 2 || dow === 3 || dow === 4);
-
-  // Logic:
-  // If no explicit save and default is planned → tap marks wfh override
-  // If no explicit save and default is wfh → tap marks office
-  // If explicitly office → tap clears it (reverts to default)
-  // If explicitly wfh → tap clears it (reverts to default)
-  let newStatus; // what to save to attendanceData ('office'|'wfh'|null=clear)
-
-  if (!current) {
-    newStatus = defaultPlanned ? 'wfh' : 'office';
-  } else {
-    newStatus = null; // clear — revert to default
-  }
-
-  if (newStatus === null) {
-    delete attendanceData[key];
-  } else {
-    attendanceData[key] = newStatus;
-  }
-
-  renderCalendar();
-  if (currentTab === 'weekly') renderWeekly();
-  updatePolicyBanner();
-  saveToLocalStorage();
-
-  const effective = getEffectiveStatus(d);
-  const label = effective === 'office' ? '🟢 Marked In Office'
-              : effective === 'planned' ? '🔵 Planned Office'
-              : '⬜ Marked WFH';
-  showToast(label);
-
-  await saveDay(key, newStatus || '');
-}
-
-// GOOGLE SHEETS SYNC
-function parseSheetDate(weekStr) {
-  // weekStr like "4 Jan", "11 Feb" etc — it's the Monday of the week
-  const parts = weekStr.trim().split(' ');
-  if (parts.length < 2) return null;
-  const day = parseInt(parts[0]);
-  const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
-  const month = months[parts[1]];
-  if (isNaN(day) || month === undefined) return null;
-  
-  // Figure out year — assume current year, or last year if month is ahead of today
-  const today = new Date();
-  let year = today.getFullYear();
-  const testDate = new Date(year, month, day);
-  // If more than 6 months in the future, it's probably last year
-  if (testDate - today > 180 * 24 * 60 * 60 * 1000) year--;
-  
-  return new Date(year, month, day);
-}
-
-function saveToLocalStorage() {
-  try { localStorage.setItem('attendanceData', JSON.stringify(attendanceData)); } catch(e) {}
-}
-
-function loadFromLocalStorage() {
-  try {
-    const cached = localStorage.getItem('attendanceData');
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (Object.keys(parsed).length > 0) {
-        attendanceData = parsed;
-        return true;
+    // Compliance note for future weeks
+    if (!isPast && !isCurrent) {
+      const note=complianceNote(mon);
+      if (note) {
+        const el=document.createElement('div');
+        el.className='compliance-note '+(note.ok?'ok':'warn');
+        el.textContent=note.ok
+          ? `✓ On track — ${note.planned} office day${note.planned!==1?'s':''} planned`
+          : `⚠ Need ${note.needed} office day${note.needed!==1?'s':''} to stay compliant`;
+        card.appendChild(el);
       }
     }
+  }
+}
+
+// ── TOGGLE ───────────────────────────────────────────────────
+async function toggleDay(d) {
+  const key=dateKey(d);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const future=d>today;
+  const saved=attendanceData[key];
+  const dow=d.getDay();
+  const defaultPlanned=future&&(dow===2||dow===3||dow===4);
+
+  let newSave;
+  if (!saved) {
+    newSave=defaultPlanned?'wfh':'office';
+  } else {
+    newSave=null;
+  }
+
+  if (newSave===null) delete attendanceData[key];
+  else attendanceData[key]=newSave;
+
+  saveLocal();
+  if (currentTab==='cal') renderCalendar();
+  else renderWeekly();
+
+  const eff=getStatus(d);
+  showToast(eff==='office'?'🟢 In Office':eff==='planned'?'🔵 Planned Office':'⬜ WFH');
+  await saveDay(key, newSave||'');
+}
+
+// ── STORAGE ──────────────────────────────────────────────────
+function saveLocal() {
+  try { localStorage.setItem('att2', JSON.stringify(attendanceData)); } catch(e) {}
+}
+
+function loadLocal() {
+  try {
+    const c=localStorage.getItem('att2');
+    if (c) { const p=JSON.parse(c); if (Object.keys(p).length>0) { attendanceData=p; return true; } }
   } catch(e) {}
   return false;
 }
 
 function loadFromSheets() {
-  return new Promise((resolve) => {
-    // Load local cache immediately for instant UI
-    const hadCache = loadFromLocalStorage();
-    if (hadCache) {
-      renderCalendar();
-      updatePolicyBanner();
-    }
+  return new Promise(resolve=>{
+    const hadCache=loadLocal();
+    if (hadCache) { render(); }
 
-    // Fetch from sheet via script tag to avoid CORS redirect issues
-    const callbackName = 'attendanceCallback_' + Date.now();
-    const script = document.createElement('script');
-    const url = `${SCRIPT_URL}?action=getAttendance&callback=${callbackName}`;
+    const cb='attCb_'+Date.now();
+    const sc=document.createElement('script');
+    let done=false;
 
-    let settled = false;
-    const timeout = setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        document.head.removeChild(script);
-        delete window[callbackName];
-        console.warn('Sheet fetch timed out, using local cache');
-        resolve(false);
-      }
-    }, 8000);
+    const timer=setTimeout(()=>{
+      if (!done) { done=true; try{document.head.removeChild(sc);}catch(e){} delete window[cb]; resolve(false); }
+    },8000);
 
-    window[callbackName] = function(data) {
-      if (!settled) {
-        settled = true;
-        clearTimeout(timeout);
-        document.head.removeChild(script);
-        delete window[callbackName];
-        if (data && data.rows && data.rows.length > 0) {
-          attendanceData = {};
-          data.rows.forEach(row => {
-            if (row.date && row.status) attendanceData[row.date] = row.status;
-          });
-          saveToLocalStorage();
+    window[cb]=function(data){
+      if (!done) {
+        done=true; clearTimeout(timer);
+        try{document.head.removeChild(sc);}catch(e){} delete window[cb];
+        if (data&&data.rows&&data.rows.length>0) {
+          attendanceData={};
+          data.rows.forEach(r=>{ if(r.date&&r.status) attendanceData[r.date]=r.status; });
+          saveLocal();
+          render();
         }
         resolve(true);
       }
     };
 
-    script.onerror = () => {
-      if (!settled) {
-        settled = true;
-        clearTimeout(timeout);
-        try { document.head.removeChild(script); } catch(e) {}
-        delete window[callbackName];
-        // Fall back to regular fetch
+    sc.onerror=()=>{
+      if (!done) {
+        done=true; clearTimeout(timer);
+        try{document.head.removeChild(sc);}catch(e){} delete window[cb];
         fetch(`${SCRIPT_URL}?action=getAttendance`)
-          .then(r => r.json())
-          .then(data => {
-            if (data && data.rows && data.rows.length > 0) {
-              attendanceData = {};
-              data.rows.forEach(row => {
-                if (row.date && row.status) attendanceData[row.date] = row.status;
-              });
-              saveToLocalStorage();
+          .then(r=>r.json()).then(data=>{
+            if(data&&data.rows&&data.rows.length>0){
+              attendanceData={};
+              data.rows.forEach(r=>{ if(r.date&&r.status) attendanceData[r.date]=r.status; });
+              saveLocal(); render();
             }
             resolve(true);
-          })
-          .catch(() => resolve(false));
+          }).catch(()=>resolve(false));
       }
     };
 
-    script.src = url;
-    document.head.appendChild(script);
+    sc.src=`${SCRIPT_URL}?action=getAttendance&callback=${cb}`;
+    document.head.appendChild(sc);
   });
 }
 
 async function saveDay(dateStr, status) {
   try {
-    const s = status || 'clear';
-    const url = `${SCRIPT_URL}?action=saveAttendanceDay&date=${dateStr}&status=${s}`;
-    await fetch(url, { redirect: 'follow', mode: 'no-cors' });
-  } catch(e) {
-    console.warn('Save error:', e);
-  }
-  showToast(status ? (status === 'office' ? '🏢 Saved as Office day' : '🏠 Saved as WFH') : '✕ Day cleared');
+    const s=status||'clear';
+    await fetch(`${SCRIPT_URL}?action=saveAttendanceDay&date=${dateStr}&status=${s}`,
+      { redirect:'follow', mode:'no-cors' });
+  } catch(e) {}
 }
 
 async function syncData() {
-  const btn = document.getElementById('syncBtn');
-  const icon = document.getElementById('syncIcon');
+  const btn=document.getElementById('syncBtn');
+  const icon=document.getElementById('syncIcon');
   btn.classList.add('loading');
-  icon.style.display = 'inline-block';
-  icon.style.animation = 'spin 0.7s linear infinite';
-  
-  const ok = await loadFromSheets();
-  
+  icon.style.animation='spin 0.7s linear infinite';
+  const ok=await loadFromSheets();
   btn.classList.remove('loading');
-  icon.style.animation = '';
-  
-  renderCalendar();
-  if (currentTab === 'weekly') renderWeekly();
-  updatePolicyBanner();
-  
-  showToast(ok ? '✓ Synced with Google Sheets' : '⚠️ Could not sync — using local data');
+  icon.style.animation='';
+  showToast(ok?'✓ Synced':'⚠ Using cached data');
 }
 
-// TAB
+// ── TABS ─────────────────────────────────────────────────────
 function switchTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    b.classList.toggle('active', (i === 0 && tab === 'calendar') || (i === 1 && tab === 'weekly'));
+  currentTab=tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',(i===0&&tab==='cal')||(i===1&&tab==='week'));
   });
-  document.getElementById('calView').classList.toggle('active', tab === 'calendar');
-  document.getElementById('weekView').classList.toggle('active', tab === 'weekly');
-  if (tab === 'weekly') renderWeekly();
+  document.getElementById('calView').classList.toggle('active', tab==='cal');
+  document.getElementById('weekView').classList.toggle('active', tab==='week');
+  if (tab==='week') renderWeekly();
 }
 
-// TOAST
+function render() {
+  if (currentTab==='cal') renderCalendar();
+  else renderWeekly();
+}
+
+// ── TOAST ────────────────────────────────────────────────────
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
+  const t=document.getElementById('toast');
+  t.textContent=msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-// INIT
-async function init() {
-  currentMonth = new Date();
-  
-  // Load from sheets
-  await loadFromSheets();
-  
-  renderCalendar();
-  updatePolicyBanner();
-}
-
-init();
+// ── INIT ─────────────────────────────────────────────────────
+currentMonth = new Date();
+loadFromSheets().then(()=>render());
+renderCalendar(); // immediate render with local data
 </script>
 
 </body>
