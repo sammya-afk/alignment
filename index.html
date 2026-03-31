@@ -798,7 +798,15 @@ async function toggleDay(d) {
 
 // ── STORAGE ──────────────────────────────────────────────────
 function saveLocal() {
-  try { localStorage.setItem('att2', JSON.stringify(attendanceData)); } catch(e) {}
+  try { localStorage.setItem('att3', JSON.stringify(attendanceData)); } catch(e) {}
+}
+
+function loadLocal() {
+  try {
+    const c = localStorage.getItem('att3');
+    if (c) { const p = JSON.parse(c); if (Object.keys(p).length > 0) { attendanceData = p; return true; } }
+  } catch(e) {}
+  return false;
 }
 
 function loadLocal() {
@@ -810,52 +818,25 @@ function loadLocal() {
   return false; // always fetch fresh from sheet
 }
 
-function loadFromSheets() {
-  return new Promise(resolve=>{
-    const hadCache=loadLocal();
-    if (hadCache) { render(); }
-
-    const cb='attCb_'+Date.now();
-    const sc=document.createElement('script');
-    let done=false;
-
-    const timer=setTimeout(()=>{
-      if (!done) { done=true; try{document.head.removeChild(sc);}catch(e){} delete window[cb]; resolve(false); }
-    },8000);
-
-    window[cb]=function(data){
-      if (!done) {
-        done=true; clearTimeout(timer);
-        try{document.head.removeChild(sc);}catch(e){} delete window[cb];
-        if (data&&data.rows&&data.rows.length>0) {
-          attendanceData={};
-          data.rows.forEach(r=>{ if(r.date&&r.status) attendanceData[r.date]=r.status; });
-          saveLocal();
-        }
-        render(); // always re-render after sheet load attempt
-        resolve(data&&data.rows&&data.rows.length>0);
-      }
-    };
-
-    sc.onerror=()=>{
-      if (!done) {
-        done=true; clearTimeout(timer);
-        try{document.head.removeChild(sc);}catch(e){} delete window[cb];
-        fetch(`${SCRIPT_URL}?action=getAttendance`)
-          .then(r=>r.json()).then(data=>{
-            if(data&&data.rows&&data.rows.length>0){
-              attendanceData={};
-              data.rows.forEach(r=>{ if(r.date&&r.status) attendanceData[r.date]=r.status; });
-              saveLocal(); render();
-            }
-            resolve(true);
-          }).catch(()=>resolve(false));
-      }
-    };
-
-    sc.src=`${SCRIPT_URL}?action=getAttendance&callback=${cb}`;
-    document.head.appendChild(sc);
-  });
+async function loadFromSheets() {
+  try {
+    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`, {
+      method: 'GET',
+      mode: 'cors',
+    });
+    const data = await res.json();
+    if (data && data.rows && data.rows.length > 0) {
+      attendanceData = {};
+      data.rows.forEach(r => { if (r.date && r.status) attendanceData[r.date] = r.status; });
+      saveLocal();
+      render();
+      return true;
+    }
+  } catch(e) {
+    console.warn('Fetch failed:', e);
+  }
+  render();
+  return false;
 }
 
 async function saveDay(dateStr, status) {
@@ -906,10 +887,9 @@ function showToast(msg) {
 
 // ── INIT ─────────────────────────────────────────────────────
 currentMonth = new Date();
-renderCalendar(); // always render immediately so calendar shows
-loadLocal();      // load cache into attendanceData
-render();         // re-render with cached data
-loadFromSheets(); // fetch fresh from sheet in background
+renderCalendar(); // show empty calendar immediately
+if (loadLocal()) render(); // show cached data instantly if available
+loadFromSheets(); // fetch fresh from sheet (updates display when done)
 </script>
 </body>
 </html>
