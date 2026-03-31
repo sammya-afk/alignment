@@ -903,34 +903,85 @@ function saveToLocalStorage() {
 function loadFromLocalStorage() {
   try {
     const cached = localStorage.getItem('attendanceData');
-    if (cached) { attendanceData = JSON.parse(cached); return true; }
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Object.keys(parsed).length > 0) {
+        attendanceData = parsed;
+        return true;
+      }
+    }
   } catch(e) {}
   return false;
 }
 
-async function loadFromSheets() {
-  // Always load local cache first so UI is instant
-  loadFromLocalStorage();
-
-  try {
-    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-    const text = await res.text();
-    const data = JSON.parse(text);
-    if (data && data.rows) {
-      attendanceData = {};
-      data.rows.forEach(row => {
-        if (row.date && row.status) {
-          attendanceData[row.date] = row.status;
-        }
-      });
-      saveToLocalStorage();
-      return true;
+function loadFromSheets() {
+  return new Promise((resolve) => {
+    // Load local cache immediately for instant UI
+    const hadCache = loadFromLocalStorage();
+    if (hadCache) {
+      renderCalendar();
+      updatePolicyBanner();
     }
-  } catch(e) {
-    console.warn('Sheet fetch failed, using local cache:', e);
-  }
 
-  return false;
+    // Fetch from sheet via script tag to avoid CORS redirect issues
+    const callbackName = 'attendanceCallback_' + Date.now();
+    const script = document.createElement('script');
+    const url = `${SCRIPT_URL}?action=getAttendance&callback=${callbackName}`;
+
+    let settled = false;
+    const timeout = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        document.head.removeChild(script);
+        delete window[callbackName];
+        console.warn('Sheet fetch timed out, using local cache');
+        resolve(false);
+      }
+    }, 8000);
+
+    window[callbackName] = function(data) {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeout);
+        document.head.removeChild(script);
+        delete window[callbackName];
+        if (data && data.rows && data.rows.length > 0) {
+          attendanceData = {};
+          data.rows.forEach(row => {
+            if (row.date && row.status) attendanceData[row.date] = row.status;
+          });
+          saveToLocalStorage();
+        }
+        resolve(true);
+      }
+    };
+
+    script.onerror = () => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeout);
+        try { document.head.removeChild(script); } catch(e) {}
+        delete window[callbackName];
+        // Fall back to regular fetch
+        fetch(`${SCRIPT_URL}?action=getAttendance`)
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.rows && data.rows.length > 0) {
+              attendanceData = {};
+              data.rows.forEach(row => {
+                if (row.date && row.status) attendanceData[row.date] = row.status;
+              });
+              saveToLocalStorage();
+            }
+            resolve(true);
+          })
+          .catch(() => resolve(false));
+      }
+    };
+
+    script.src = url;
+    document.head.appendChild(script);
+  });
 }
 
 async function saveDay(dateStr, status) {
