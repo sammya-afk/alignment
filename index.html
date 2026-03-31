@@ -572,7 +572,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMAmtsVk9GhWbleFbnbJSRnc6_M2fSjjw9oYeVdw7gwHbxrdGh3KrPmWI-fknwLY4H/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY0J9oEBjPAVS1AUCtlgLlhx6ROCP7eCa2meC61Odn9zYrHUjzrJ-lsl1_xq46UiqS/exec';
 
 // STATE
 let attendanceData = {}; // key: "YYYY-MM-DD", val: "office"|"wfh"
@@ -583,7 +583,10 @@ let currentTab = 'calendar';
 
 // Helpers
 function dateKey(d) {
-  return d.toISOString().split('T')[0];
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
 }
 
 function getMonday(d) {
