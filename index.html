@@ -868,7 +868,8 @@ async function setDay(status) {
   if (currentTab === 'weekly') renderWeekly();
   updatePolicyBanner();
   
-  // Save to Google Sheets
+  // Save to localStorage immediately, then sync to Sheets
+  saveToLocalStorage();
   await saveDay(key, status === 'clear' ? '' : status);
 }
 
@@ -892,46 +893,40 @@ function parseSheetDate(weekStr) {
   return new Date(year, month, day);
 }
 
-async function loadFromSheets() {
+function saveToLocalStorage() {
+  try { localStorage.setItem('attendanceData', JSON.stringify(attendanceData)); } catch(e) {}
+}
+
+function loadFromLocalStorage() {
   try {
-    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`, { method: 'GET' });
-    const data = await res.json();
+    const cached = localStorage.getItem('attendanceData');
+    if (cached) { attendanceData = JSON.parse(cached); return true; }
+  } catch(e) {}
+  return false;
+}
+
+async function loadFromSheets() {
+  // Always load local cache first so UI is instant
+  loadFromLocalStorage();
+
+  try {
+    const res = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+    const text = await res.text();
+    const data = JSON.parse(text);
     if (data && data.rows) {
       attendanceData = {};
       data.rows.forEach(row => {
-        // row: { date: "YYYY-MM-DD", status: "office"|"wfh" }
         if (row.date && row.status) {
           attendanceData[row.date] = row.status;
         }
       });
+      saveToLocalStorage();
       return true;
     }
-  } catch(e) {}
-  
-  // Fallback: try getData and parse existing format
-  try {
-    const res2 = await fetch(`${SCRIPT_URL}?action=getData`, { method: 'GET' });
-    const data2 = await res2.json();
-    if (data2 && data2.rows) {
-      attendanceData = {};
-      data2.rows.forEach(row => {
-        // row has week string and Mon/Tue/Wed/Thu/Fri values
-        const monday = parseSheetDate(row.week || '');
-        if (!monday) return;
-        const days = ['mon','tue','wed','thu','fri'];
-        days.forEach((d, i) => {
-          const val = (row[d] || '').toLowerCase().trim();
-          const date = new Date(monday);
-          date.setDate(monday.getDate() + i);
-          const key = dateKey(date);
-          if (val === 'yes') attendanceData[key] = 'office';
-          else if (val === 'no') attendanceData[key] = 'wfh';
-        });
-      });
-      return true;
-    }
-  } catch(e2) {}
-  
+  } catch(e) {
+    console.warn('Sheet fetch failed, using local cache:', e);
+  }
+
   return false;
 }
 
