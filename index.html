@@ -346,6 +346,14 @@ body {
 }
 .compliance-note.ok   { color: var(--green); }
 .compliance-note.warn { color: var(--amber); }
+.rolling-total {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+.rolling-total.aligned { background: var(--green-light); color: var(--green-text); }
+.rolling-total.short   { background: var(--red-light);   color: var(--red-text); }
 
 /* ── TOAST ── */
 .toast {
@@ -662,6 +670,21 @@ function changeMonth(dir) {
 }
 
 // ── WEEKLY ───────────────────────────────────────────────────
+
+// For any given week (by monday), compute what the rolling best-8-of-12 total
+// would be AT THE END of that week, using real past data + planned future
+function rollingTotalAtWeek(targetMonday) {
+  const today=new Date(); today.setHours(0,0,0,0);
+  // The 12-week window ending at targetMonday is: targetMonday-11 weeks to targetMonday
+  const weeks=[];
+  for (let i=0; i<12; i++) {
+    const m=new Date(targetMonday); m.setDate(targetMonday.getDate()-i*7);
+    weeks.push(weekOfficeDays(m));
+  }
+  weeks.sort((a,b)=>b-a);
+  return weeks.slice(0,8).reduce((s,v)=>s+v,0);
+}
+
 function renderWeekly() {
   updateBanners();
   const { best8keys } = calcPast();
@@ -670,19 +693,35 @@ function renderWeekly() {
   const container=document.getElementById('weekCards');
   container.innerHTML='';
 
-  for (let i=-6;i<=6;i++) {
+  // Past 12 weeks (oldest first) + current + 6 future = 19 weeks total
+  const weeks=[];
+  for (let i=-12; i<=6; i++) {
     const mon=new Date(thisMon); mon.setDate(thisMon.getDate()+i*7);
-    const isCurrent=i===0;
-    const isPast=mon<thisMon;
-    const inBest8=isPast && best8keys.has(dateKey(mon));
-    const days=weekOfficeDays(mon);
+    weeks.push({ mon, i });
+  }
+
+  weeks.forEach(({ mon, i }) => {
+    const isCurrent = i===0;
+    const isPast = i<0;
+    const isFuture = i>0;
+    const inBest8 = isPast && best8keys.has(dateKey(mon));
+    const days = weekOfficeDays(mon);
+    const rollingTotal = rollingTotalAtWeek(mon);
+    const aligned = rollingTotal >= 24;
 
     const card=document.createElement('div');
-    card.className='week-card'+(isCurrent?' current':inBest8?' in-best8':'');
+    let cardCls = 'week-card';
+    if (isCurrent) cardCls += ' current';
+    else if (inBest8) cardCls += ' in-best8';
+    card.className = cardCls;
 
-    const badgeCls=days>=3?'good':days>0?'warn':'none';
-    const label=isCurrent?'This Week':formatWeekLabel(mon);
-    const best8html=inBest8?'<span class="best8-tag">★ Best 8</span>':'';
+    const badgeCls = days>=3?'good':days>0?'warn':'none';
+    const label = isCurrent ? 'This Week' : formatWeekLabel(mon);
+    const best8html = inBest8 ? '<span class="best8-tag">★ Best 8</span>' : '';
+
+    // Rolling total badge
+    const totalCls = aligned ? 'rolling-total aligned' : 'rolling-total short';
+    const totalLabel = aligned ? `✓ ${rollingTotal} days` : `✗ ${rollingTotal}/24`;
 
     card.innerHTML=`
       <div class="week-card-head">
@@ -690,7 +729,10 @@ function renderWeekly() {
           <div class="week-lbl">${label}</div>
           ${best8html}
         </div>
-        <div class="day-count ${badgeCls}">${days} day${days!==1?'s':''}</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="day-count ${badgeCls}">${days}d</div>
+          <div class="${totalCls}">${totalLabel}</div>
+        </div>
       </div>
       <div class="week-days"></div>
     `;
@@ -713,19 +755,17 @@ function renderWeekly() {
       daysRow.appendChild(cell);
     }
 
-    // Compliance note for future weeks
-    if (!isPast && !isCurrent) {
+    // Future weeks: compliance note
+    if (isFuture) {
       const note=complianceNote(mon);
-      if (note) {
+      if (note && !note.ok) {
         const el=document.createElement('div');
-        el.className='compliance-note '+(note.ok?'ok':'warn');
-        el.textContent=note.ok
-          ? `✓ On track — ${note.planned} office day${note.planned!==1?'s':''} planned`
-          : `⚠ Need ${note.needed} office day${note.needed!==1?'s':''} to stay compliant`;
+        el.className='compliance-note warn';
+        el.textContent=`⚠ Need ${note.needed} office day${note.needed!==1?'s':''} this week to stay compliant`;
         card.appendChild(el);
       }
     }
-  }
+  });
 }
 
 // ── TOGGLE ───────────────────────────────────────────────────
@@ -831,10 +871,13 @@ async function syncData() {
   const icon=document.getElementById('syncIcon');
   btn.classList.add('loading');
   icon.style.animation='spin 0.7s linear infinite';
+  // Clear cache so we always get fresh data from sheet
+  try { localStorage.removeItem('att2'); localStorage.removeItem('attendanceData'); } catch(e) {}
+  attendanceData = {};
   const ok=await loadFromSheets();
   btn.classList.remove('loading');
   icon.style.animation='';
-  showToast(ok?'✓ Synced':'⚠ Using cached data');
+  showToast(ok ? '✓ Synced — ' + Object.keys(attendanceData).length + ' days loaded' : '⚠ Could not reach sheet');
 }
 
 // ── TABS ─────────────────────────────────────────────────────
