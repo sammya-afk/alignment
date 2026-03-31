@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Office Attendance</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -57,11 +57,11 @@ box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 display: flex;
 align-items: center;
 justify-content: space-between;
-margin-bottom: 10px;
+margin-bottom: 8px;
 }
 .header h1 {
 font-family: ‘DM Serif Display’, serif;
-font-size: 20px;
+font-size: 22px;
 font-weight: 400;
 line-height: 1.1;
 letter-spacing: -0.3px;
@@ -110,28 +110,29 @@ color: var(–text2);
 /* TAB BAR */
 .tab-bar {
 display: flex;
-background: rgba(255,255,255,0.12);
+background: rgba(255,255,255,0.15);
 border-radius: 10px;
 padding: 3px;
 margin: 0;
+width: 100%;
 }
 .tab-btn {
 flex: 1;
-padding: 8px;
+padding: 8px 4px;
 border: none;
 background: transparent;
 border-radius: 8px;
 font-family: ‘DM Sans’, sans-serif;
 font-size: 13px;
 font-weight: 500;
-color: rgba(255,255,255,0.6);
+color: rgba(255,255,255,0.55);
 cursor: pointer;
 transition: all 0.2s;
 }
 .tab-btn.active {
-background: rgba(255,255,255,0.18);
+background: rgba(255,255,255,0.2);
 color: white;
-box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 /* MAIN CONTENT */
@@ -536,10 +537,10 @@ margin: 20px 0 10px;
   </div>
   <!-- CALENDAR VIEW -->
   <div class="view-section active" id="calView">
-    <div class="stats-row" id="statsRow">
-      <div class="stat-card"><div class="stat-value" id="s1">—</div><div class="stat-label">Past 8wk Days</div></div>
+    <div class="stats-row">
+      <div class="stat-card" id="s1card"><div class="stat-value" id="s1">—</div><div class="stat-label">Past 8wk</div></div>
       <div class="stat-card"><div class="stat-value" id="s2">—</div><div class="stat-label">This Week</div></div>
-      <div class="stat-card"><div class="stat-value" id="s3">—</div><div class="stat-label">Forecast Days</div></div>
+      <div class="stat-card" id="s3card"><div class="stat-value" id="s3">—</div><div class="stat-label">Forecast</div></div>
     </div>
 
 ```
@@ -756,9 +757,9 @@ function updatePolicyBanner() {
   document.getElementById('s1').textContent = best8;
   document.getElementById('s2').textContent = thisWeek;
   document.getElementById('s3').textContent = forecast;
-  const s1card = document.getElementById('s1').parentElement;
+  const s1card = document.getElementById('s1card');
   s1card.className = 'stat-card ' + (best8 >= 24 ? 'highlight' : best8 >= 20 ? 'warn-stat' : 'bad-stat');
-  const s3card = document.getElementById('s3').parentElement;
+  const s3card = document.getElementById('s3card');
   s3card.className = 'stat-card ' + (forecast >= 24 ? 'highlight' : forecast >= 20 ? 'warn-stat' : 'bad-stat');
 
   // Past banner
