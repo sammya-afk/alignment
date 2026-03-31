@@ -856,7 +856,7 @@ function loadFromSheets() {
       }
     };
 
-    sc.src = SCRIPT_URL + '?action=getAttendance&callback=' + cb;
+    sc.src = SCRIPT_URL + '?action=getAttendance&callback=' + cb + '&t=' + Date.now();
     document.head.appendChild(sc);
   });
 }
