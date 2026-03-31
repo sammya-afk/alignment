@@ -416,13 +416,7 @@ body {
       <div class="banner-sub"  id="pastSub"></div>
     </div>
   </div>
-  <div class="banner" id="forecastBanner">
-    <div class="banner-icon">🔮</div>
-    <div>
-      <div class="banner-title" id="forecastTitle">Calculating...</div>
-      <div class="banner-sub"  id="forecastSub"></div>
-    </div>
-  </div>
+
 
   <!-- STATS -->
   <div class="stats-row">
@@ -436,7 +430,7 @@ body {
     </div>
     <div class="stat-card" id="s3card">
       <div class="stat-val" id="s3">—</div>
-      <div class="stat-lbl">Forecast</div>
+      <div class="stat-lbl">Weeks at Risk</div>
     </div>
   </div>
 
@@ -572,16 +566,17 @@ function calcPast() {
   return { best8, thisWeek, best8keys, notCountedKeys };
 }
 
-function calcForecast() {
+function calcWeeksAtRisk() {
+  // Count how many of the next 20 future weeks would have rolling total < 24
   const today=new Date(); today.setHours(0,0,0,0);
   const thisMon=getMonday(today);
-  const weeks=[];
-  for (let i=-6;i<=5;i++) {
-    const m=new Date(thisMon); m.setDate(thisMon.getDate()+i*7);
-    weeks.push(weekOfficeDays(m));
+  let atRisk=0;
+  for (let i=1;i<=20;i++) {
+    const mon=new Date(thisMon); mon.setDate(thisMon.getDate()+i*7);
+    const total=rollingTotalAtWeek(mon);
+    if (total<24) atRisk++;
   }
-  weeks.sort((a,b)=>b-a);
-  return weeks.slice(0,8).reduce((s,v)=>s+v,0);
+  return atRisk;
 }
 
 function complianceNote(monday) {
@@ -605,14 +600,14 @@ function complianceNote(monday) {
 // ── UI UPDATE ────────────────────────────────────────────────
 function updateBanners() {
   const { best8, thisWeek, best8keys, notCountedKeys } = calcPast();
-  const forecast = calcForecast();
+  const atRisk = calcWeeksAtRisk();
 
   // Stats
   document.getElementById('s1').textContent = best8;
   document.getElementById('s2').textContent = thisWeek;
-  document.getElementById('s3').textContent = forecast;
+  document.getElementById('s3').textContent = atRisk;
   document.getElementById('s1card').className = 'stat-card ' + (best8>=24?'good':best8>=20?'warn':'bad');
-  document.getElementById('s3card').className = 'stat-card ' + (forecast>=24?'good':forecast>=20?'warn':'bad');
+  document.getElementById('s3card').className = 'stat-card ' + (atRisk===0?'good':atRisk<=3?'warn':'bad');
 
   // Past banner
   const pb = document.getElementById('pastBanner');
@@ -625,19 +620,6 @@ function updateBanners() {
     pb.className='banner '+(needed<=4?'warn':'bad');
     document.getElementById('pastTitle').textContent=`${needed} more office day${needed!==1?'s':''} needed`;
     document.getElementById('pastSub').textContent=`${best8} / 24 days across best 8 of last 12 weeks`;
-  }
-
-  // Forecast banner
-  const fb = document.getElementById('forecastBanner');
-  const fneeded = 24-forecast;
-  if (forecast>=24) {
-    fb.className='banner good';
-    document.getElementById('forecastTitle').textContent=`On track — ${forecast} days projected`;
-    document.getElementById('forecastSub').textContent='Based on past + Tue/Wed/Thu planned office';
-  } else {
-    fb.className='banner '+(fneeded<=4?'warn':'bad');
-    document.getElementById('forecastTitle').textContent=`Projected short by ${fneeded} day${fneeded!==1?'s':''}`;
-    document.getElementById('forecastSub').textContent=`${forecast} / 24 projected across best 8 of rolling 12 weeks`;
   }
 
   return { best8keys, notCountedKeys };
