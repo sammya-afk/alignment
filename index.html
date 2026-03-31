@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Office Attendance</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -47,7 +47,8 @@ margin: 0 auto;
 .header {
 background: var(–text);
 color: white;
-padding: 52px 20px 12px;
+padding: 0 20px 12px;
+padding-top: max(52px, env(safe-area-inset-top, 52px));
 position: sticky;
 top: 0;
 z-index: 100;
@@ -863,8 +864,9 @@ function showToast(msg) {
 
 // ── INIT ─────────────────────────────────────────────────────
 currentMonth = new Date();
-loadFromSheets().then(()=>render());
-renderCalendar(); // immediate render with local data
+// Load local cache first for instant render, then fetch from sheets
+if (loadLocal()) render();
+loadFromSheets();
 </script>
 
 </body>
