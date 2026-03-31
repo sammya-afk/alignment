@@ -803,11 +803,11 @@ function saveLocal() {
 
 function loadLocal() {
   try {
-    // Try new key first, fall back to old key
-    const c=localStorage.getItem('att2') || localStorage.getItem('attendanceData');
-    if (c) { const p=JSON.parse(c); if (Object.keys(p).length>0) { attendanceData=p; return true; } }
+    // Clear all old cache keys to force fresh fetch
+    localStorage.removeItem('attendanceData');
+    localStorage.removeItem('att2');
   } catch(e) {}
-  return false;
+  return false; // always fetch fresh from sheet
 }
 
 function loadFromSheets() {
