@@ -46,20 +46,21 @@ margin: 0 auto;
 .header {
 background: var(–text);
 color: white;
-padding: 52px 24px 20px;
+padding: 16px 24px 12px;
 position: sticky;
 top: 0;
 z-index: 100;
+box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 .header-top {
 display: flex;
-align-items: flex-start;
+align-items: center;
 justify-content: space-between;
-margin-bottom: 16px;
+margin-bottom: 10px;
 }
 .header h1 {
 font-family: ‘DM Serif Display’, serif;
-font-size: 26px;
+font-size: 20px;
 font-weight: 400;
 line-height: 1.1;
 letter-spacing: -0.3px;
@@ -108,10 +109,10 @@ color: var(–text2);
 /* TAB BAR */
 .tab-bar {
 display: flex;
-background: var(–surface2);
+background: rgba(255,255,255,0.12);
 border-radius: 10px;
 padding: 3px;
-margin: 16px 24px 0;
+margin: 0;
 }
 .tab-btn {
 flex: 1;
@@ -122,14 +123,14 @@ border-radius: 8px;
 font-family: ‘DM Sans’, sans-serif;
 font-size: 13px;
 font-weight: 500;
-color: var(–text2);
+color: rgba(255,255,255,0.6);
 cursor: pointer;
 transition: all 0.2s;
 }
 .tab-btn.active {
-background: var(–surface);
-color: var(–text);
-box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+background: rgba(255,255,255,0.18);
+color: white;
+box-shadow: 0 1px 4px rgba(0,0,0,0.15);
 }
 
 /* MAIN CONTENT */
