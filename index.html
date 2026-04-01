@@ -245,6 +245,9 @@ body {
 .cal-cell:nth-child(7n) { border-right: none; }
 .cal-cell.empty   { background: var(--bg); cursor: default; }
 .cal-cell.weekend { background: var(--bg); cursor: default; color: var(--text3); }
+.cal-cell.other-month { background: var(--bg); color: var(--text3); font-weight: 400; }
+.cal-cell.other-month.office { background: var(--green-light); opacity: 0.5; }
+.cal-cell.other-month.planned { background: var(--blue-light); opacity: 0.5; }
 .cal-cell.office  { background: var(--green-light); color: var(--green-text); font-weight: 700; }
 .cal-cell.planned { background: var(--blue-light);  color: var(--blue-text);  font-weight: 600; }
 .cal-cell.wfh     { background: var(--surface); }
@@ -638,12 +641,29 @@ function renderCalendar() {
   const cells = document.getElementById('calCells');
   cells.innerHTML = '';
 
+  // Days from previous month
+  const prevMonthLastDay = new Date(year, month, 0);
   for (let i=0; i<firstDay.getDay(); i++) {
-    const el=document.createElement('div');
-    el.className='cal-cell empty';
+    const dayNum = prevMonthLastDay.getDate() - firstDay.getDay() + 1 + i;
+    const d = new Date(year, month-1, dayNum);
+    const el = document.createElement('div');
+    let cls = 'cal-cell other-month';
+    if (isWeekend(d)) {
+      cls += ' weekend';
+    } else {
+      cls += ' ' + getStatus(d);
+      if (d < today) {
+        const mon = getMonday(d);
+        if (notCountedKeys.has(dateKey(mon))) cls += ' not-counted';
+      }
+    }
+    el.className = cls;
+    el.textContent = dayNum;
+    if (!isWeekend(d)) el.onclick = ()=>toggleDay(d);
     cells.appendChild(el);
   }
 
+  // Current month days
   for (let day=1; day<=lastDay.getDate(); day++) {
     const d = new Date(year, month, day);
     const el = document.createElement('div');
@@ -653,9 +673,7 @@ function renderCalendar() {
     } else {
       cls += ' ' + getStatus(d);
       if (isToday(d)) cls += ' today';
-      // Mark monday of best-8 weeks
       if (d.getDay()===1 && best8keys.has(dateKey(d))) cls += ' best8-mon';
-      // Mark days in not-counted weeks (past, within 12-week window, not best 8)
       if (d < today) {
         const mon = getMonday(d);
         if (notCountedKeys.has(dateKey(mon))) cls += ' not-counted';
@@ -667,12 +685,24 @@ function renderCalendar() {
     cells.appendChild(el);
   }
 
+  // Days from next month to fill remaining cells
   const total = firstDay.getDay() + lastDay.getDate();
   const rem = total % 7;
-  if (rem>0) for (let i=0;i<7-rem;i++) {
-    const el=document.createElement('div');
-    el.className='cal-cell empty';
-    cells.appendChild(el);
+  if (rem > 0) {
+    for (let i=1; i<=7-rem; i++) {
+      const d = new Date(year, month+1, i);
+      const el = document.createElement('div');
+      let cls = 'cal-cell other-month';
+      if (isWeekend(d)) {
+        cls += ' weekend';
+      } else {
+        cls += ' ' + getStatus(d);
+      }
+      el.className = cls;
+      el.textContent = i;
+      if (!isWeekend(d)) el.onclick = ()=>toggleDay(d);
+      cells.appendChild(el);
+    }
   }
 }
 
@@ -726,7 +756,7 @@ function renderWeekly() {
 
   // Past 12 + current + 20 future = 33 weeks total
   let currentCard = null;
-  for (let i=-12; i<=20; i++) {
+  for (let i=-12; i<=52; i++) {
     const mon=new Date(thisMon); mon.setDate(thisMon.getDate()+i*7);
     const isCurrent = i===0;
     const isPast = i<0;
