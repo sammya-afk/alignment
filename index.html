@@ -493,6 +493,17 @@ let currentMonth = new Date();
 let currentTab = 'cal';
 let weeklyScrolled = false;
 
+// ── COMPANY HOLIDAYS — treated as WFH, not clickable ─────────
+const HOLIDAYS = new Set([
+  '2025-01-01','2025-01-20','2025-05-26','2025-06-19',
+  '2025-07-04','2025-09-01','2025-11-27','2025-11-28',
+  '2025-12-24','2025-12-25',
+  '2026-01-01','2026-01-19','2026-05-25','2026-06-19',
+  '2026-07-03','2026-09-07','2026-11-26','2026-11-27',
+  '2026-12-24','2026-12-25',
+]);
+function isHoliday(d) { return HOLIDAYS.has(dateKey(d)); }
+
 // ── HELPERS ──────────────────────────────────────────────────
 function dateKey(d) {
   // Use local date parts to avoid UTC timezone shift
@@ -535,6 +546,8 @@ function getStatus(d) {
   const saved = attendanceData[key];
   const future = d > today;
 
+  // Holidays always WFH — office is closed
+  if (isHoliday(d)) return 'wfh';
   if (saved === 'office') return future ? 'planned' : 'office';
   if (saved === 'wfh')    return 'wfh';
   if (!future)            return 'wfh';
@@ -648,14 +661,15 @@ function renderCalendar() {
   cells.innerHTML = '';
 
   // Pre-compute which mondays visible in this calendar view are at-risk
+  // Uses same rollingTotalAtWeek logic as weekly view
   const atRiskMondays = new Set();
-  // Find all mondays that appear in this calendar view (including overflow)
-  const calStart = new Date(year, month, 1 - firstDay.getDay()); // first cell date
-  for (let w=0; w<7; w++) {
-    const mon = new Date(calStart);
-    mon.setDate(calStart.getDate() + w*7);
-    // normalize to monday
-    const monday = getMonday(mon.getDay()===0 ? new Date(mon.getTime()+86400000) : mon);
+  const calStart = new Date(year, month, 1 - firstDay.getDay());
+  for (let w=0; w<6; w++) {
+    const cellDate = new Date(calStart);
+    cellDate.setDate(calStart.getDate() + w*7);
+    const monday = getMonday(cellDate.getDay()===0
+      ? new Date(cellDate.getTime()+86400000)
+      : cellDate);
     const total = rollingTotalAtWeek(monday);
     if (total < 24) atRiskMondays.add(dateKey(monday));
   }
@@ -678,7 +692,7 @@ function renderCalendar() {
     }
     el.className = cls;
     el.textContent = dayNum;
-    if (!isWeekend(d)) el.onclick = ()=>toggleDay(d);
+    if (!isWeekend(d) && !isHoliday(d)) el.onclick = ()=>toggleDay(d);
     const prevMon = getMonday(d.getDay()===0 ? new Date(d.getTime()+86400000) : d);
     if (atRiskMondays.has(dateKey(prevMon))) cls += ' at-risk';
     el.className = cls;
@@ -705,7 +719,8 @@ function renderCalendar() {
     if (atRiskMondays.has(dateKey(currMon))) cls += ' at-risk';
     el.className = cls;
     el.textContent = day;
-    if (!isWeekend(d)) el.onclick = ()=>toggleDay(d);
+    if (!isWeekend(d) && !isHoliday(d)) el.onclick = ()=>toggleDay(d);
+    else if (isHoliday(d)) el.style.cursor = 'default';
     cells.appendChild(el);
   }
 
@@ -726,7 +741,7 @@ function renderCalendar() {
       if (atRiskMondays.has(dateKey(nextMon))) cls += ' at-risk';
       el.className = cls;
       el.textContent = i;
-      if (!isWeekend(d)) el.onclick = ()=>toggleDay(d);
+      if (!isWeekend(d) && !isHoliday(d)) el.onclick = ()=>toggleDay(d);
       cells.appendChild(el);
     }
   }
@@ -836,7 +851,8 @@ function renderWeekly() {
         <div class="wday-num${isToday(day)?' today':''}">${day.getDate()}</div>
         <div class="wday-pip">${pip}</div>
       `;
-      cell.onclick=()=>toggleDay(day);
+      if (!isHoliday(day)) cell.onclick=()=>toggleDay(day);
+      else cell.style.cursor='default';
       daysRow.appendChild(cell);
     }
 
