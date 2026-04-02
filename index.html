@@ -396,6 +396,68 @@ body {
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
+/* ── CONFIRM MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  padding: 16px 24px 44px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 18px;
+}
+.modal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+  margin-bottom: 6px;
+  text-align: center;
+}
+.modal-sub {
+  font-size: 14px;
+  color: var(--text2);
+  text-align: center;
+  margin-bottom: 24px;
+}
+.modal-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.modal-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.modal-btn:active { opacity: 0.7; }
+.modal-btn.confirm { background: var(--text); color: white; }
+.modal-btn.cancel  { background: var(--surface2); color: var(--text2); }
+
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -482,6 +544,17 @@ body {
 
 </div>
 
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="confirmTitle">Update Past Day?</div>
+    <div class="modal-sub" id="confirmSub">Tuesday, Mar 18</div>
+    <div class="modal-btns">
+      <button class="modal-btn confirm" id="confirmYes">Yes, Update</button>
+      <button class="modal-btn cancel" onclick="closeConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 </div><!-- end app-wrap -->
 
@@ -902,6 +975,11 @@ async function toggleDay(d) {
   showToast(eff==='office'?'🟢 In Office':eff==='planned'?'🔵 Planned Office':'⬜ WFH');
   saveDay(key, newSave||'');
 }
+
+// Close confirm modal when tapping overlay
+document.getElementById('confirmModal').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
 
 // ── STORAGE ──────────────────────────────────────────────────
 function saveLocal() {
