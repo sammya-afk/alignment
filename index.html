@@ -949,7 +949,37 @@ function renderWeekly() {
 }
 
 // ── TOGGLE ───────────────────────────────────────────────────
+let pendingToggleDay = null;
+
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('open');
+  pendingToggleDay = null;
+}
+
+function confirmToggle() {
+  const d = pendingToggleDay;
+  closeConfirm();
+  if (d) doToggleDay(d);
+}
+
 async function toggleDay(d) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  if (d < today) {
+    // Past date — show confirmation
+    pendingToggleDay = d;
+    const label = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+    const current = attendanceData[dateKey(d)];
+    document.getElementById('confirmSub').textContent = label;
+    document.getElementById('confirmYes').textContent = current === 'office' ? 'Yes, Mark as WFH' : 'Yes, Mark as Office';
+    document.getElementById('confirmYes').onclick = confirmToggle;
+    document.getElementById('confirmModal').classList.add('open');
+    return;
+  }
+  doToggleDay(d);
+}
+
+async function doToggleDay(d) {
+  if (navigator.vibrate) navigator.vibrate(10);
   const key=dateKey(d);
   const today=new Date(); today.setHours(0,0,0,0);
   const future=d>today;
@@ -976,7 +1006,6 @@ async function toggleDay(d) {
   saveDay(key, newSave||'');
 }
 
-// Close confirm modal when tapping overlay
 document.getElementById('confirmModal').addEventListener('click', function(e) {
   if (e.target === this) closeConfirm();
 });
