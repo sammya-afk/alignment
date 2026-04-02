@@ -189,6 +189,15 @@ body {
   transition: all 0.15s;
 }
 .nav-btn:hover { background: var(--surface2); }
+.today-btn {
+  width: auto;
+  border-radius: 20px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  border-color: var(--accent);
+}
 
 /* ── LEGEND ── */
 .legend {
@@ -510,6 +519,7 @@ body {
     <div class="section-nav">
       <h2 id="calTitle">—</h2>
       <div class="nav-arrows">
+        <button class="nav-btn today-btn" onclick="jumpToToday()">Today</button>
         <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
         <button class="nav-btn" onclick="changeMonth(1)">›</button>
       </div>
@@ -823,6 +833,20 @@ function renderCalendar() {
 function changeMonth(dir) {
   currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth()+dir, 1);
   renderCalendar();
+}
+
+function jumpToToday() {
+  currentMonth = new Date();
+  renderCalendar();
+  // Flash today's cell briefly
+  setTimeout(() => {
+    const todayCell = document.querySelector('.cal-cell.today');
+    if (todayCell) {
+      todayCell.style.transition = 'transform 0.15s';
+      todayCell.style.transform = 'scale(1.3)';
+      setTimeout(() => { todayCell.style.transform = 'scale(1)'; }, 200);
+    }
+  }, 50);
 }
 
 // ── SWIPE SUPPORT ────────────────────────────────────────────
